@@ -196,18 +196,18 @@ function formatFraction(a, b) {
 
 function crearProblema() {
   actualizarModo();
-  let max = 5;
+  const rangos = {
+    facil: { min: 1, max: 6 },
+    medio: { min: 1, max: 12 },
+    dificil: { min: 1, max: 30 },
+  };
 
-  if (nivel === "medio") {
-    max = 15;
-  } else if (nivel === "dificil") {
-    max = 50;
-  }
+  const { min, max } = rangos[nivel] || rangos.facil;
 
-  let a = Math.floor(Math.random() * max) + 1;
-  let b = Math.floor(Math.random() * max) + 1;
-  let c = Math.floor(Math.random() * max) + 1;
-  let d = Math.floor(Math.random() * max) + 1;
+  let a = Math.floor(Math.random() * (max - min + 1)) + min;
+  let b = Math.floor(Math.random() * (max - min + 1)) + min;
+  let c = Math.floor(Math.random() * (max - min + 1)) + min;
+  let d = Math.floor(Math.random() * (max - min + 1)) + min;
 
   let operaciones = [];
 
