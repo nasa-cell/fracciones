@@ -223,10 +223,14 @@ function crearProblema() {
 
   if (operacion === "+") {
     resultado = simplificar(a * d + c * b, b * d);
+  } else if (operacion === "-") {
+    resultado = simplificar(a * d - c * b, b * d);
   } else if (operacion === "×") {
     resultado = simplificar(a * c, b * d);
-  } else {
+  } else if (operacion === "÷") {
     resultado = simplificar(a * d, b * c);
+  } else {
+    resultado = simplificar(a * d + c * b, b * d);
   }
 
   correcta = resultado;
