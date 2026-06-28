@@ -25,26 +25,26 @@ function activarSonido() {
     const bgAudio = document.getElementById('bg-audio');
     const bgAudio2 = document.getElementById('bg-audio-2');
     if (bgAudio) {
-        bgAudio.muted = false;
-        bgAudio.volume = 0.28;
-        bgAudio.load();
-        bgAudio.play().catch((error) => {
-            console.warn('No se pudo reproducir el audio de fondo:', error);
-        });
+        try {
+            bgAudio.muted = false;
+            bgAudio.volume = 0.28;
+            bgAudio.loop = true;
+            bgAudio.load();
+            bgAudio.play().catch((error) => { console.warn('No se pudo reproducir el audio de fondo:', error); });
+        } catch (e) { console.warn('activarSonido bgAudio error', e); }
         
         // Cuando termine el primer audio, inicia el segundo
         bgAudio.addEventListener('ended', function() {
             if (bgAudio2) {
                 bgAudio2.muted = false;
                 bgAudio2.volume = 0.28;
+                bgAudio2.loop = false;
                 bgAudio2.load();
-                bgAudio2.play().catch((error) => {
-                    console.warn('No se pudo reproducir el audio 2 de fondo:', error);
-                });
-                
+                bgAudio2.play().catch((error) => { console.warn('No se pudo reproducir el audio 2 de fondo:', error); });
+
                 // Cuando termine el segundo, vuelve a reproducir el primero
                 bgAudio2.addEventListener('ended', function() {
-                    activarSonido();
+                    try { bgAudio.play().catch(()=>{}); } catch(e){}
                 }, { once: true });
             }
         }, { once: true });
@@ -59,6 +59,7 @@ function ingresarJuego() {
     }
 
     jugadorNombre = nombre;
+    usedProblemas.clear();
     document.getElementById('heroe').innerText = jugadorAvatar;
     document.getElementById('heroeNombre').innerText = jugadorNombre;
 
@@ -162,10 +163,6 @@ function generarPregunta() {
         return;
     }
 
-    if (problemaActual === 1) {
-        usedProblemas.clear();
-    }
-
     let nivelDatos = cronicaAventura[rondaActual - 1];
     document.getElementById("enemigo").innerHTML = nivelDatos.enemigo;
     document.getElementById("enemigoNombre").innerHTML = nivelDatos.enemigoN;
@@ -183,21 +180,287 @@ function generarPregunta() {
     const bloquesArea = document.getElementById("bloquesArea");
     bloquesArea.innerHTML = "";
     
-    for (let i = 0; i < den; i++) {
-        const bloque = document.createElement("div");
-        bloque.classList.add("bloque-mat");
-        if (i < num) {
-            bloque.classList.add("activo");
-        } else {
-            bloque.classList.add("inactiva", "bloque-mat", "inactivo");
-        }
-        bloquesArea.appendChild(bloque);
+    // Seleccionar forma aleatoria según el reino (ronda)
+    const formasPorRonda = [
+        ['cuadrado','circulo','rectangulo'],
+        ['cuadrado','circulo','rectangulo','triangulo'],
+        ['cuadrado','circulo','rectangulo','triangulo','pentagono'],
+        ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono'],
+        ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella'],
+        ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon'],
+        ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon','semicirculo']
+    ];
+    const posibles = formasPorRonda[Math.min(rondaActual-1, formasPorRonda.length-1)];
+    const formaActual = posibles[Math.floor(Math.random() * posibles.length)];
+    const orientaciones = ['vertical', 'horizontal'];
+    const orientacion = orientaciones[Math.floor(Math.random() * orientaciones.length)];
+    
+    // Dos pequeñas, luego dos grandes, dos pequeñas, dos grandes...
+    const modoVisual = (Math.floor((problemaActual - 1) / 2) % 2) === 0 ? 'pequenasFiguras' : 'formaGrande';
+    
+    if (modoVisual === 'formaGrande') {
+        const canvas = crearCanvasForma(bloquesArea);
+        dibujarFormaCanvas(canvas, formaActual, num, den, orientacion, false);
+    } else {
+        dibujarPiezasPequenas(bloquesArea, formaActual, num, den);
     }
 
     document.getElementById("respuesta").value = "";
     document.getElementById("respuesta").focus();
     bloqueado = false;
 }
+
+function crearCanvasForma(container) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 260;
+    canvas.height = 260;
+    canvas.className = 'shape-canvas';
+    canvas.style.width = '260px';
+    canvas.style.height = '260px';
+    container.appendChild(canvas);
+    return canvas;
+}
+
+function dibujarPiezasPequenas(container, forma, num, den) {
+    container.className = 'bloques-container';
+    container.style.cssText = '';
+    const piezasContenedor = document.createElement('div');
+    piezasContenedor.className = 'pequenas-piezas';
+    container.appendChild(piezasContenedor);
+
+    for (let i = 0; i < den; i++) {
+        const activo = i < num;
+        // Para figuras complejas, usamos SVG embebido en cada bloque pequeño para consistencia
+        const pieza = document.createElement('div');
+        pieza.className = 'bloque-svg';
+        let color = activo ? '#22c55e' : '#cbd5e1';
+        if (forma === 'circulo') {
+            pieza.className = 'bloque-circulo';
+            if (activo) pieza.classList.add('activo'); else pieza.classList.add('inactivo');
+            piezasContenedor.appendChild(pieza);
+            continue;
+        }
+        if (forma === 'triangulo') {
+            pieza.className = 'bloque-triangulo ' + (activo ? 'activo' : 'inactivo');
+            piezasContenedor.appendChild(pieza);
+            continue;
+        }
+        if (forma === 'rectangulo') {
+            pieza.className = 'bloque-rectangulo ' + (activo ? 'activo' : 'inactivo');
+            piezasContenedor.appendChild(pieza);
+            continue;
+        }
+
+        // Figuras SVG para pentágono, hexágono, estrella, corazón, semicirculo
+        let svg = '';
+        if (forma === 'pentagono' || forma === 'hexagono') {
+            const sides = forma === 'pentagono' ? 5 : 6;
+            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><polygon points="${generatePolygonPoints(50,50,40,sides)}" fill="${color}" stroke="#ffffff" stroke-width="2"/></svg>`;
+        } else if (forma === 'estrella') {
+            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><path d="${starPath(5,50,50,36,16)}" fill="${color}" stroke="#ffffff" stroke-width="2"/></svg>`;
+        } else if (forma === 'corazon') {
+            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><path d="M50 74 L20 44 A14 14 0 0 1 35 20 A18 18 0 0 1 50 34 A18 18 0 0 1 65 20 A14 14 0 0 1 80 44 Z" fill="${color}" stroke="#ffffff" stroke-width="2"/></svg>`;
+        } else if (forma === 'semicirculo') {
+            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><path d="M10 50 A40 40 0 0 1 90 50 L90 90 L10 90 Z" fill="${color}" stroke="#ffffff" stroke-width="2"/></svg>`;
+        } else {
+            // fallback cuadrado
+            pieza.className = 'bloque-mat ' + (activo ? 'activo' : 'inactivo');
+            piezasContenedor.appendChild(pieza);
+            continue;
+        }
+        pieza.innerHTML = svg;
+        piezasContenedor.appendChild(pieza);
+    }
+}
+
+// Helpers para generar puntos SVG
+function generatePolygonPoints(cx, cy, r, sides) {
+    const pts = [];
+    for (let i=0;i<sides;i++){
+        const a = (Math.PI*2*i/sides) - Math.PI/2;
+        const x = cx + Math.cos(a)*r;
+        const y = cy + Math.sin(a)*r;
+        pts.push(x+','+y);
+    }
+    return pts.join(' ');
+}
+
+function starPath(points, cx, cy, outerR, innerR) {
+    let path = '';
+    for (let i=0;i<points*2;i++){
+        const r = (i%2===0)?outerR:innerR;
+        const a = Math.PI/points * i - Math.PI/2;
+        const x = cx + Math.cos(a)*r;
+        const y = cy + Math.sin(a)*r;
+        path += (i===0? 'M':'L') + x + ' ' + y + ' ';
+    }
+    path += 'Z';
+    return path;
+}
+
+function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', mostrarFraccion = true) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    const centerX = w / 2;
+    const centerY = h / 2;
+    const radius = Math.min(w, h) * 0.33;
+    let activeColor = '#22c55e';
+    const inactiveColor = '#cbd5e1';
+    let borderColor = '#ffffffcc';
+    const strokeWidth = 3;
+
+    if (forma === 'circulo') {
+        activeColor = '#3b82f6';
+        borderColor = '#93c5fdcc';
+    } else if (forma === 'triangulo') {
+        activeColor = '#f59e0b';
+        borderColor = '#fbbf24cc';
+    } else if (forma === 'rectangulo') {
+        activeColor = '#ec4899';
+        borderColor = '#f9a8d4cc';
+    } else if (forma === 'cuadrado') {
+        activeColor = '#22c55e';
+        borderColor = '#86efaccc';
+    }
+
+    ctx.lineWidth = strokeWidth;
+    ctx.strokeStyle = borderColor;
+
+    if (forma === 'circulo') {
+        const startAngleOffset = -Math.PI / 2;
+        for (let i = 0; i < den; i++) {
+            const startAngle = startAngleOffset + (i * 2 * Math.PI) / den;
+            const endAngle = startAngleOffset + ((i + 1) * 2 * Math.PI) / den;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+            ctx.closePath();
+            ctx.fillStyle = i < num ? activeColor : inactiveColor;
+            ctx.fill();
+            ctx.stroke();
+        }
+    } else if (forma === 'triangulo') {
+        const top = { x: centerX, y: orientacion === 'vertical' ? centerY - radius * 0.95 : centerY + radius * 0.95 };
+        const left = { x: centerX - radius, y: orientacion === 'vertical' ? centerY + radius * 0.8 : centerY - radius * 0.8 };
+        const right = { x: centerX + radius, y: orientacion === 'vertical' ? centerY + radius * 0.8 : centerY - radius * 0.8 };
+        for (let i = 0; i < den; i++) {
+            const x1 = left.x + ((right.x - left.x) * i) / den;
+            const x2 = left.x + ((right.x - left.x) * (i + 1)) / den;
+            ctx.beginPath();
+            ctx.moveTo(top.x, top.y);
+            ctx.lineTo(x1, left.y);
+            ctx.lineTo(x2, left.y);
+            ctx.closePath();
+            ctx.fillStyle = i < num ? '#f59e0b' : inactiveColor;
+            ctx.fill();
+            ctx.stroke();
+        }
+    } else if (forma === 'rectangulo') {
+        const isHorizontal = orientacion === 'horizontal';
+        const rectWidth = isHorizontal ? radius * 1.7 : radius * 1.1;
+        const rectHeight = isHorizontal ? radius * 1.1 : radius * 1.7;
+        const left = centerX - rectWidth / 2;
+        const top = centerY - rectHeight / 2;
+        const sliceSize = isHorizontal ? rectWidth / den : rectHeight / den;
+        for (let i = 0; i < den; i++) {
+            ctx.fillStyle = i < num ? '#ec4899' : inactiveColor;
+            if (isHorizontal) {
+                ctx.fillRect(left + sliceSize * i, top, sliceSize, rectHeight);
+                ctx.strokeRect(left + sliceSize * i, top, sliceSize, rectHeight);
+            } else {
+                ctx.fillRect(left, top + sliceSize * i, rectWidth, sliceSize);
+                ctx.strokeRect(left, top + sliceSize * i, rectWidth, sliceSize);
+            }
+        }
+    } else {
+        const squareSize = orientacion === 'horizontal' ? radius * 1.9 : radius * 1.4;
+        const left = centerX - squareSize / 2;
+        const top = centerY - squareSize / 2;
+        const sliceWidth = squareSize / den;
+        for (let i = 0; i < den; i++) {
+            ctx.fillStyle = i < num ? '#22c55e' : inactiveColor;
+            ctx.fillRect(left + sliceWidth * i, top, sliceWidth, squareSize);
+            ctx.strokeRect(left + sliceWidth * i, top, sliceWidth, squareSize);
+        }
+    }
+
+    // Nuevas formas: pentágono, hexágono, estrella, corazón, semicirculo
+    if (['pentagono','hexagono','estrella','corazon','semicirculo'].includes(forma)) {
+        // crear path de la forma para usar como clip
+        let shapePath = new Path2D();
+        if (forma === 'pentagono' || forma === 'hexagono') {
+            const sides = forma === 'pentagono' ? 5 : 6;
+            const pts = [];
+            for (let i = 0; i < sides; i++) {
+                const a = (Math.PI * 2 * i / sides) - Math.PI/2;
+                const x = centerX + Math.cos(a) * radius * 2.2;
+                const y = centerY + Math.sin(a) * radius * 2.2;
+                pts.push({x,y});
+            }
+            shapePath.moveTo(pts[0].x, pts[0].y);
+            for (let i=1;i<pts.length;i++) shapePath.lineTo(pts[i].x, pts[i].y);
+            shapePath.closePath();
+        } else if (forma === 'estrella') {
+            const p = 5; const outerR = radius*2.2; const innerR = radius*0.9;
+            let first = true;
+            for (let i=0;i<p*2;i++){
+                const r = (i%2===0)?outerR:innerR;
+                const a = Math.PI/p * i - Math.PI/2;
+                const x = centerX + Math.cos(a)*r;
+                const y = centerY + Math.sin(a)*r;
+                if (first) { shapePath.moveTo(x,y); first=false; } else shapePath.lineTo(x,y);
+            }
+            shapePath.closePath();
+        } else if (forma === 'corazon') {
+            // approximate heart
+            const topY = centerY - radius*0.2;
+            shapePath.moveTo(centerX, centerY + radius*0.9);
+            shapePath.bezierCurveTo(centerX + radius*1.2, centerY + radius*0.2, centerX + radius*0.6, centerY - radius*1.1, centerX, topY);
+            shapePath.bezierCurveTo(centerX - radius*0.6, centerY - radius*1.1, centerX - radius*1.2, centerY + radius*0.2, centerX, centerY + radius*0.9);
+            shapePath.closePath();
+        } else if (forma === 'semicirculo') {
+            shapePath.moveTo(centerX - radius*2, centerY);
+            shapePath.arc(centerX, centerY, radius*2, Math.PI, 0, false);
+            shapePath.lineTo(centerX + radius*2, centerY + radius*2);
+            shapePath.lineTo(centerX - radius*2, centerY + radius*2);
+            shapePath.closePath();
+        }
+
+        // rellenar por sectores usando clip
+        ctx.save();
+        ctx.clip(shapePath);
+        const startOffset = -Math.PI/2;
+        for (let i=0;i<den;i++){
+            const start = startOffset + (i*2*Math.PI)/den;
+            const end = startOffset + ((i+1)*2*Math.PI)/den;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, Math.max(w,h), start, end);
+            ctx.closePath();
+            ctx.fillStyle = i < num ? activeColor : inactiveColor;
+            ctx.fill();
+        }
+        ctx.restore();
+        // stroke outline
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = strokeWidth;
+        ctx.stroke(shapePath);
+    }
+
+    if (mostrarFraccion) {
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${num}/${den}`, centerX, h - 26);
+        ctx.strokeStyle = '#00000033';
+        ctx.lineWidth = 1;
+        ctx.strokeText(`${num}/${den}`, centerX, h - 26);
+    }
+}
+
 
 function actualizar() {
     if (vidaJugador < 0) vidaJugador = 0;
@@ -219,34 +482,40 @@ function actualizar() {
     let enemigoDaño = document.getElementById("enemigoDaño");
     
     // Mostrar rajaduras según el daño - más notorio conforme aumenta
-    heroDaño.style.opacity = Math.min(1, porcentajeDañoHeroe * 3);
-    enemigoDaño.style.opacity = Math.min(1, porcentajeDañoEnemigo * 3);
-    
-    // Escala de rajaduras: más grandes conforme hay más daño
-    let escalaRajaduraHeroe = 1 + (porcentajeDañoHeroe * 0.5);
-    let escalaRajaduraEnemigo = 1 + (porcentajeDañoEnemigo * 0.5);
-    heroDaño.style.transform = `translate(-50%, -50%) scale(${escalaRajaduraHeroe})`;
-    enemigoDaño.style.transform = `translate(-50%, -50%) scale(${escalaRajaduraEnemigo})`;
+    if (heroDaño) {
+        heroDaño.style.opacity = Math.min(1, porcentajeDañoHeroe * 3);
+        let escalaRajaduraHeroe = 1 + (porcentajeDañoHeroe * 0.5);
+        heroDaño.style.transform = `translate(-50%, -50%) scale(${escalaRajaduraHeroe})`;
+    }
+    if (enemigoDaño) {
+        enemigoDaño.style.opacity = Math.min(1, porcentajeDañoEnemigo * 3);
+        let escalaRajaduraEnemigo = 1 + (porcentajeDañoEnemigo * 0.5);
+        enemigoDaño.style.transform = `translate(-50%, -50%) scale(${escalaRajaduraEnemigo})`;
+    }
     
     // Efecto: Escala reducida + Rotación
-    let escalaHeroe = 1 - (porcentajeDañoHeroe * 0.2);
-    let rotacionHeroe = porcentajeDañoHeroe * 8;
-    let briHeroHeroe = 1 - (porcentajeDañoHeroe * 0.4);
-    heroeSprite.style.transform = `scale(${escalaHeroe}) rotate(${rotacionHeroe}deg)`;
-    heroeSprite.style.filter = `brightness(${briHeroHeroe})`;
+    if (heroeSprite) {
+        let escalaHeroe = 1 - (porcentajeDañoHeroe * 0.2);
+        let rotacionHeroe = porcentajeDañoHeroe * 8;
+        let briHeroHeroe = 1 - (porcentajeDañoHeroe * 0.4);
+        heroeSprite.style.transform = `scale(${escalaHeroe}) rotate(${rotacionHeroe}deg)`;
+        heroeSprite.style.filter = `brightness(${briHeroHeroe})`;
+    }
+    if (enemigoSprite) {
+        let escalaEnemigo = 1 - (porcentajeDañoEnemigo * 0.2);
+        let rotacionEnemigo = porcentajeDañoEnemigo * 8;
+        let brightnessEnemigo = 1 - (porcentajeDañoEnemigo * 0.4);
+        enemigoSprite.style.transform = `scale(${escalaEnemigo}) rotate(${rotacionEnemigo}deg)`;
+        enemigoSprite.style.filter = `brightness(${brightnessEnemigo})`;
+    }
     
-    let escalaEnemigo = 1 - (porcentajeDañoEnemigo * 0.2);
-    let rotacionEnemigo = porcentajeDañoEnemigo * 8;
-    let brightnessEnemigo = 1 - (porcentajeDañoEnemigo * 0.4);
-    enemigoSprite.style.transform = `scale(${escalaEnemigo}) rotate(${rotacionEnemigo}deg)`;
-    enemigoSprite.style.filter = `brightness(${brightnessEnemigo})`;
+    const puntosElem = document.getElementById("puntos");
+    const rondaElem = document.getElementById("rondaTxt");
+    const problemaElem = document.getElementById("problemaTxt");
 
-    document.getElementById("puntos").innerHTML = puntos;
-    document.getElementById("rondaTxt").innerHTML = `${rondaActual} / 7`;
-    document.getElementById("problemaTxt").innerHTML = `${Math.min(problemaActual, PROBLEMAS_POR_ENEMIGO)} / ${PROBLEMAS_POR_ENEMIGO}`;
-
-    let progresoAventura = ((rondaActual - 1) / 7) * 100;
-    document.getElementById("xpBar").style.width = progresoAventura + "%";
+    if (puntosElem) puntosElem.innerHTML = puntos;
+    if (rondaElem) rondaElem.innerHTML = `${rondaActual} / 7`;
+    if (problemaElem) problemaElem.innerHTML = `${Math.min(problemaActual, PROBLEMAS_POR_ENEMIGO)} / ${PROBLEMAS_POR_ENEMIGO}`;
 }
 
 function crearDisparo(esDelHeroe) {
@@ -395,6 +664,7 @@ function reiniciarJuego() {
     puntos = 0;
     rondaActual = 1;
     problemaActual = 1;
+    usedProblemas.clear();
     
     document.getElementById("moduloFinal").classList.add("oculto");
     document.getElementById("moduloJuego").classList.remove("oculto");

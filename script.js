@@ -14,6 +14,7 @@ let correcta = { num: 0, den: 1 };
 let seleccionActual = null;
 let audioContext = null;
 let videoActivo = true;
+let usedProblemas = new Set();
 
 function toggleOperacion(op) {
   operacionesSeleccionadas[op] = !operacionesSeleccionadas[op];
@@ -126,6 +127,7 @@ function resetGame() {
   if (erroresEl) erroresEl.innerText = errores;
   if (puntosEl) puntosEl.innerText = puntos;
   if (mensajeEl) mensajeEl.innerText = "";
+  usedProblemas.clear();
   actualizarProgreso();
 }
 
@@ -220,19 +222,35 @@ function crearProblema() {
 
   let operacion = operaciones[Math.floor(Math.random() * operaciones.length)];
   let resultado;
+  let problemaStr;
+  let intento = 0;
 
-  if (operacion === "+") {
-    resultado = simplificar(a * d + c * b, b * d);
-  } else if (operacion === "-") {
-    resultado = simplificar(a * d - c * b, b * d);
-  } else if (operacion === "×") {
-    resultado = simplificar(a * c, b * d);
-  } else if (operacion === "÷") {
-    resultado = simplificar(a * d, b * c);
-  } else {
-    resultado = simplificar(a * d + c * b, b * d);
-  }
+  do {
+    if (intento > 0) {
+      a = Math.floor(Math.random() * (max - min + 1)) + min;
+      b = Math.floor(Math.random() * (max - min + 1)) + min;
+      c = Math.floor(Math.random() * (max - min + 1)) + min;
+      d = Math.floor(Math.random() * (max - min + 1)) + min;
+      operacion = operaciones[Math.floor(Math.random() * operaciones.length)];
+    }
 
+    if (operacion === "+") {
+      resultado = simplificar(a * d + c * b, b * d);
+    } else if (operacion === "-") {
+      resultado = simplificar(a * d - c * b, b * d);
+    } else if (operacion === "×") {
+      resultado = simplificar(a * c, b * d);
+    } else if (operacion === "÷") {
+      resultado = simplificar(a * d, b * c);
+    } else {
+      resultado = simplificar(a * d + c * b, b * d);
+    }
+
+    problemaStr = `${a}/${b} ${operacion} ${c}/${d}`;
+    intento++;
+  } while (usedProblemas.has(problemaStr) && intento < 60);
+
+  usedProblemas.add(problemaStr);
   correcta = resultado;
   let preguntaHTML =
     formatFraction(a, b) +

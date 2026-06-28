@@ -8,10 +8,23 @@
 </head>
 <body>
 <audio id="bg-audio" preload="auto">
-  <source src="../fondo%20de%20sonido.mp3" type="audio/mpeg">
+    <source src="../fondo de sonido.mp3" type="audio/mpeg">
 </audio>
 <audio id="bg-audio-2" preload="auto">
-  <source src="../fondo%20de%20sonido2.mp3" type="audio/mpeg">
+    <source src="../fondo de sonido2.mp3" type="audio/mpeg">
+</audio>
+<!-- Efectos de sonido adicionales -->
+<audio id="sfx-acierto" preload="auto">
+    <source src="../fondo de sonido2.mp3" type="audio/mpeg">
+</audio>
+<audio id="sfx-fallo" preload="auto">
+    <source src="../fondo de sinido3.mp3" type="audio/mpeg">
+</audio>
+<audio id="sfx-victoria" preload="auto">
+    <source src="../fondo de sonido4.mp3" type="audio/mpeg">
+</audio>
+<audio id="sfx-derrota" preload="auto">
+    <source src="../fondo de sinido3.mp3" type="audio/mpeg">
 </audio>
 <div class="contenedor">
 
@@ -33,18 +46,6 @@
     <div id="moduloJuego" class="oculto">
         <h1>⚔️ FRACTION HERO RPG ⚔️</h1>
         <div class="subtitulo">Las 7 Pruebas Celestiales</div>
-
-        <div class="info">
-            <div>🔰 Batalla <span id="rondaTxt">1 / 7</span></div>
-            <div>📌 Problema <span id="problemaTxt">1 / 8</span></div>
-            <div>🏆 Puntos <span id="puntos">0</span></div>
-        </div>
-
-        <div class="xp-container">
-            <div class="xp">
-                <div id="xpBar"></div>
-            </div>
-        </div>
 
         <div class="disparos-container" id="disparosContainer"></div>
 
@@ -82,16 +83,24 @@
             </div>
         </div>
 
+        <div class="stats-abajo">
+            <div><span class="stat-icon">🔰</span> Batalla <strong><span id="rondaTxt">1 / 7</span></strong></div>
+            <div><span class="stat-icon">🏆</span> Puntos <strong><span id="puntos">0</span></strong></div>
+        </div>
+
         <div class="panel">
             <div id="pregunta">¿Qué fracción representa?</div>
-            <div id="bloquesArea" class="bloques-container"></div>
+            <div class="panel-grid">
+                <div id="bloquesArea" class="bloques-container panel-shape"></div>
 
-            <div class="controles">
-                <input id="respuesta" placeholder="Ej: 3/5" autocomplete="off">
-                <button id="btnAtacar" onclick="verificar()">¡ATACAR!</button>
+                <div class="panel-controls">
+                    <div class="controles">
+                        <input id="respuesta" placeholder="Ej: 3/5" autocomplete="off">
+                        <button id="btnAtacar" onclick="verificar()">¡ATACAR!</button>
+                    </div>
+                    <div id="mensaje"></div>
+                </div>
             </div>
-
-            <div id="mensaje"></div>
         </div>
     </div>
 
