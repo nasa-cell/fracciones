@@ -13,6 +13,16 @@ let jugadorAvatar = '🧙‍♂️';
 let problemaActual = 1;
 const PROBLEMAS_POR_ENEMIGO = 8;
 let usedProblemas = new Set();
+let temaUsuario = null;
+
+function shuffleArray(array) {
+    let arr = array.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
 
 function seleccionarAvatar(avatar) {
     jugadorAvatar = avatar;
@@ -59,6 +69,7 @@ function ingresarJuego() {
     }
 
     jugadorNombre = nombre;
+    temaUsuario = crearTemaUsuario();
     usedProblemas.clear();
     document.getElementById('heroe').innerText = jugadorAvatar;
     document.getElementById('heroeNombre').innerText = jugadorNombre;
@@ -147,15 +158,65 @@ const AudioEngine = {
     }
 };
 
+const paletasBase = [
+    { activo: '#22c55e', inactivo: '#cbd5e1', borde: '#86efac', brillo: '#bef264' },
+    { activo: '#3b82f6', inactivo: '#cbd5e1', borde: '#93c5fd', brillo: '#60a5fa' },
+    { activo: '#f59e0b', inactivo: '#e2e8f0', borde: '#fbbf24', brillo: '#fde08a' },
+    { activo: '#8b5cf6', inactivo: '#c7d2fe', borde: '#c4b5fd', brillo: '#ddd6fe' },
+    { activo: '#14b8a6', inactivo: '#cbe7e2', borde: '#5eead4', brillo: '#a5f3fc' },
+    { activo: '#ec4899', inactivo: '#f5d0e4', borde: '#fb7185', brillo: '#fbcfe8' },
+    { activo: '#f97316', inactivo: '#fde68a', borde: '#fdba74', brillo: '#fed7aa' }
+];
+
 const cronicaAventura = [
     { ronda: 1, heroe: "🧙‍♂️", heroeN: "Mago Aprendiz", enemigo: "👾", enemigoN: "Slime de Virus", minDen: 4, maxDen: 6 },
     { ronda: 2, heroe: "🏹", heroeN: "Arquero Explorador", enemigo: "🤖", enemigoN: "Gólem Mecánico", minDen: 5, maxDen: 8 },
     { ronda: 3, heroe: "🛡️", heroeN: "Caballero de Hierro", enemigo: "👺", enemigoN: "Troll de Montaña", minDen: 7, maxDen: 10 },
     { ronda: 4, heroe: "🥷", heroeN: "Ninja de las Sombras", enemigo: "👹", enemigoN: "Ogro Feroz", minDen: 9, maxDen: 12 },
-    { ronda: 5, heroe: "🧜‍♂️", heroeN: "Rey de los Mares", enemigo: "🦑", enemigoN: "Kraken Marino", minDen: 11, maxDen: 14 },
-    { ronda: 6, heroe: "🧝‍♀️", heroeN: "Elfa de la Luz", enemigo: "💀", enemigoN: "Señor de la Muerte", minDen: 13, maxDen: 16 },
-    { ronda: 7, heroe: "👑", heroeN: "Paladín Supremo", enemigo: "🐲", enemigoN: "Dragón del Caos", minDen: 15, maxDen: 20 }
+    { ronda: 5, heroe: "🧜‍♂️", heroeN: "Rey de los Mares", enemigo: "🦑", enemigoN: "Kraken Marino", minDen: 11, maxDen: 15 },
+    { ronda: 6, heroe: "🧝‍♀️", heroeN: "Elfa de la Luz", enemigo: "💀", enemigoN: "Señor de la Muerte", minDen: 13, maxDen: 18 },
+    { ronda: 7, heroe: "👑", heroeN: "Paladín Supremo", enemigo: "🐲", enemigoN: "Dragón del Caos", minDen: 15, maxDen: 22 }
 ];
+
+function crearTemaUsuario() {
+    const paletas = shuffleArray(paletasBase);
+    const extras = shuffleArray(['pentagono','hexagono','estrella','corazon','semicirculo']);
+    const formasPorRonda = [
+        ['cuadrado','circulo','rectangulo'],
+        ['cuadrado','circulo','rectangulo','triangulo'],
+        ['cuadrado','circulo','rectangulo','triangulo', extras[0]],
+        ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1]],
+        ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2]],
+        ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2], extras[3]],
+        ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2], extras[3], extras[4]]
+    ];
+    const rangos = cronicaAventura.map((base, index) => {
+        const ajuste = Math.floor(Math.random() * 3);
+        return {
+            ...base,
+            minDen: base.minDen + ajuste,
+            maxDen: base.maxDen + ajuste + 1,
+            paleta: paletas[index]
+        };
+    });
+    return { paletas, formasPorRonda, rangos };
+}
+
+function obtenerPaletaRonda(ronda) {
+    if (temaUsuario && temaUsuario.rangos && temaUsuario.rangos[ronda - 1]) {
+        return temaUsuario.rangos[ronda - 1].paleta;
+    }
+    const paletas = [
+        { activo: '#22c55e', inactivo: '#cbd5e1', borde: '#86efac', brillo: '#bef264' },
+        { activo: '#3b82f6', inactivo: '#cbd5e1', borde: '#93c5fd', brillo: '#60a5fa' },
+        { activo: '#f59e0b', inactivo: '#e2e8f0', borde: '#fbbf24', brillo: '#fde08a' },
+        { activo: '#8b5cf6', inactivo: '#c7d2fe', borde: '#c4b5fd', brillo: '#ddd6fe' },
+        { activo: '#14b8a6', inactivo: '#cbe7e2', borde: '#5eead4', brillo: '#a5f3fc' },
+        { activo: '#ec4899', inactivo: '#f5d0e4', borde: '#fb7185', brillo: '#fbcfe8' },
+        { activo: '#f97316', inactivo: '#fde68a', borde: '#fdba74', brillo: '#fed7aa' }
+    ];
+    return paletas[Math.min(ronda - 1, paletas.length - 1)];
+}
 
 function generarPregunta() {
     if (rondaActual > 7) {
@@ -163,7 +224,7 @@ function generarPregunta() {
         return;
     }
 
-    let nivelDatos = cronicaAventura[rondaActual - 1];
+    let nivelDatos = temaUsuario && temaUsuario.rangos ? temaUsuario.rangos[rondaActual - 1] : cronicaAventura[rondaActual - 1];
     document.getElementById("enemigo").innerHTML = nivelDatos.enemigo;
     document.getElementById("enemigoNombre").innerHTML = nivelDatos.enemigoN;
 
@@ -181,7 +242,7 @@ function generarPregunta() {
     bloquesArea.innerHTML = "";
     
     // Seleccionar forma aleatoria según el reino (ronda)
-    const formasPorRonda = [
+    const formasPorRonda = temaUsuario && temaUsuario.formasPorRonda ? temaUsuario.formasPorRonda : [
         ['cuadrado','circulo','rectangulo'],
         ['cuadrado','circulo','rectangulo','triangulo'],
         ['cuadrado','circulo','rectangulo','triangulo','pentagono'],
@@ -190,6 +251,7 @@ function generarPregunta() {
         ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon'],
         ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon','semicirculo']
     ];
+    const paleta = obtenerPaletaRonda(rondaActual);
     const posibles = formasPorRonda[Math.min(rondaActual-1, formasPorRonda.length-1)];
     const formaActual = posibles[Math.floor(Math.random() * posibles.length)];
     const orientaciones = ['vertical', 'horizontal'];
@@ -200,9 +262,9 @@ function generarPregunta() {
     
     if (modoVisual === 'formaGrande') {
         const canvas = crearCanvasForma(bloquesArea);
-        dibujarFormaCanvas(canvas, formaActual, num, den, orientacion, false);
+        dibujarFormaCanvas(canvas, formaActual, num, den, orientacion, false, paleta);
     } else {
-        dibujarPiezasPequenas(bloquesArea, formaActual, num, den);
+        dibujarPiezasPequenas(bloquesArea, formaActual, num, den, paleta);
     }
 
     document.getElementById("respuesta").value = "";
@@ -221,7 +283,7 @@ function crearCanvasForma(container) {
     return canvas;
 }
 
-function dibujarPiezasPequenas(container, forma, num, den) {
+function dibujarPiezasPequenas(container, forma, num, den, paleta) {
     container.className = 'bloques-container';
     container.style.cssText = '';
     const piezasContenedor = document.createElement('div');
@@ -233,7 +295,7 @@ function dibujarPiezasPequenas(container, forma, num, den) {
         // Para figuras complejas, usamos SVG embebido en cada bloque pequeño para consistencia
         const pieza = document.createElement('div');
         pieza.className = 'bloque-svg';
-        let color = activo ? '#22c55e' : '#cbd5e1';
+        let color = activo ? paleta.activo : paleta.inactivo;
         if (forma === 'circulo') {
             pieza.className = 'bloque-circulo';
             if (activo) pieza.classList.add('activo'); else pieza.classList.add('inactivo');
@@ -298,7 +360,7 @@ function starPath(points, cx, cy, outerR, innerR) {
     return path;
 }
 
-function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', mostrarFraccion = true) {
+function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', mostrarFraccion = true, paleta = null) {
     const ctx = canvas.getContext('2d');
     const w = canvas.width;
     const h = canvas.height;
@@ -307,23 +369,27 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
     const centerX = w / 2;
     const centerY = h / 2;
     const radius = Math.min(w, h) * 0.33;
-    let activeColor = '#22c55e';
-    const inactiveColor = '#cbd5e1';
-    let borderColor = '#ffffffcc';
+    let activeColor = paleta ? paleta.activo : '#22c55e';
+    const inactiveColor = paleta ? paleta.inactivo : '#cbd5e1';
+    let borderColor = paleta ? paleta.borde + 'cc' : '#ffffffcc';
     const strokeWidth = 3;
 
+    if (paleta) {
+        activeColor = paleta.activo;
+        borderColor = paleta.borde + 'cc';
+    }
     if (forma === 'circulo') {
-        activeColor = '#3b82f6';
-        borderColor = '#93c5fdcc';
+        activeColor = paleta ? '#60a5fa' : '#3b82f6';
+        borderColor = paleta ? '#93c5fdcc' : '#93c5fdcc';
     } else if (forma === 'triangulo') {
-        activeColor = '#f59e0b';
-        borderColor = '#fbbf24cc';
+        activeColor = paleta ? '#fbbf24' : '#f59e0b';
+        borderColor = paleta ? '#fde68a99' : '#fbbf24cc';
     } else if (forma === 'rectangulo') {
-        activeColor = '#ec4899';
-        borderColor = '#f9a8d4cc';
+        activeColor = paleta ? '#ec4899' : '#ec4899';
+        borderColor = paleta ? '#fbcfe8cc' : '#f9a8d4cc';
     } else if (forma === 'cuadrado') {
-        activeColor = '#22c55e';
-        borderColor = '#86efaccc';
+        activeColor = paleta ? paleta.activo : '#22c55e';
+        borderColor = paleta ? paleta.borde + 'cc' : '#86efaccc';
     }
 
     ctx.lineWidth = strokeWidth;
@@ -354,7 +420,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             ctx.lineTo(x1, left.y);
             ctx.lineTo(x2, left.y);
             ctx.closePath();
-            ctx.fillStyle = i < num ? '#f59e0b' : inactiveColor;
+            ctx.fillStyle = i < num ? activeColor : inactiveColor;
             ctx.fill();
             ctx.stroke();
         }
@@ -366,7 +432,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
         const top = centerY - rectHeight / 2;
         const sliceSize = isHorizontal ? rectWidth / den : rectHeight / den;
         for (let i = 0; i < den; i++) {
-            ctx.fillStyle = i < num ? '#ec4899' : inactiveColor;
+            ctx.fillStyle = i < num ? activeColor : inactiveColor;
             if (isHorizontal) {
                 ctx.fillRect(left + sliceSize * i, top, sliceSize, rectHeight);
                 ctx.strokeRect(left + sliceSize * i, top, sliceSize, rectHeight);
@@ -381,7 +447,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
         const top = centerY - squareSize / 2;
         const sliceWidth = squareSize / den;
         for (let i = 0; i < den; i++) {
-            ctx.fillStyle = i < num ? '#22c55e' : inactiveColor;
+            ctx.fillStyle = i < num ? activeColor : inactiveColor;
             ctx.fillRect(left + sliceWidth * i, top, sliceWidth, squareSize);
             ctx.strokeRect(left + sliceWidth * i, top, sliceWidth, squareSize);
         }
@@ -664,6 +730,7 @@ function reiniciarJuego() {
     puntos = 0;
     rondaActual = 1;
     problemaActual = 1;
+    temaUsuario = crearTemaUsuario();
     usedProblemas.clear();
     
     document.getElementById("moduloFinal").classList.add("oculto");
