@@ -199,9 +199,9 @@ function formatFraction(a, b) {
 function crearProblema() {
   actualizarModo();
   const rangos = {
-    facil: { min: 1, max: 6 },
-    medio: { min: 1, max: 12 },
-    dificil: { min: 1, max: 30 },
+    facil: { min: 1, max: 9 },
+    medio: { min: 10, max: 99 },
+    dificil: { min: 100, max: 999 },
   };
 
   const { min, max } = rangos[nivel] || rangos.facil;
