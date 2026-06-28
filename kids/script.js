@@ -361,15 +361,88 @@ function generatePolygonPoints(cx, cy, r, sides) {
 
 function starPath(points, cx, cy, outerR, innerR) {
     let path = '';
-    for (let i=0;i<points*2;i++){
-        const r = (i%2===0)?outerR:innerR;
-        const a = Math.PI/points * i - Math.PI/2;
-        const x = cx + Math.cos(a)*r;
-        const y = cy + Math.sin(a)*r;
-        path += (i===0? 'M':'L') + x + ' ' + y + ' ';
+    for (let i = 0; i < points * 2; i++) {
+        const r = (i % 2 === 0) ? outerR : innerR;
+        const a = Math.PI / points * i - Math.PI / 2;
+        const x = cx + Math.cos(a) * r;
+        const y = cy + Math.sin(a) * r;
+        path += (i === 0 ? 'M' : 'L') + x + ' ' + y + ' ';
     }
     path += 'Z';
     return path;
+}
+
+function createShapePath(forma, centerX, centerY, radius, orientacion) {
+    const path = new Path2D();
+    if (forma === 'pentagono' || forma === 'hexagono' || forma === 'octagono') {
+        const sides = forma === 'pentagono' ? 5 : forma === 'hexagono' ? 6 : 8;
+        const scale = forma === 'octagono' ? 1.7 : 2.2;
+        for (let i = 0; i < sides; i++) {
+            const a = (Math.PI * 2 * i / sides) - Math.PI / 2;
+            const x = centerX + Math.cos(a) * radius * scale;
+            const y = centerY + Math.sin(a) * radius * scale;
+            if (i === 0) path.moveTo(x, y);
+            else path.lineTo(x, y);
+        }
+        path.closePath();
+    } else if (forma === 'estrella') {
+        const outerR = radius * 2.2;
+        const innerR = radius * 0.95;
+        const points = 5;
+        for (let i = 0; i < points * 2; i++) {
+            const r = (i % 2 === 0) ? outerR : innerR;
+            const a = Math.PI / points * i - Math.PI / 2;
+            const x = centerX + Math.cos(a) * r;
+            const y = centerY + Math.sin(a) * r;
+            if (i === 0) path.moveTo(x, y);
+            else path.lineTo(x, y);
+        }
+        path.closePath();
+    } else if (forma === 'corazon') {
+        const topY = centerY - radius * 0.2;
+        path.moveTo(centerX, centerY + radius * 0.9);
+        path.bezierCurveTo(centerX + radius * 1.2, centerY + radius * 0.2, centerX + radius * 0.6, centerY - radius * 1.1, centerX, topY);
+        path.bezierCurveTo(centerX - radius * 0.6, centerY - radius * 1.1, centerX - radius * 1.2, centerY + radius * 0.2, centerX, centerY + radius * 0.9);
+        path.closePath();
+    } else if (forma === 'semicirculo') {
+        path.moveTo(centerX - radius * 2, centerY);
+        path.arc(centerX, centerY, radius * 2, Math.PI, 0, false);
+        path.lineTo(centerX + radius * 2, centerY + radius * 2);
+        path.lineTo(centerX - radius * 2, centerY + radius * 2);
+        path.closePath();
+    } else if (forma === 'rombo') {
+        path.moveTo(centerX, centerY - radius * 1.6);
+        path.lineTo(centerX + radius * 1.3, centerY);
+        path.lineTo(centerX, centerY + radius * 1.6);
+        path.lineTo(centerX - radius * 1.3, centerY);
+        path.closePath();
+    } else if (forma === 'trapecio') {
+        const topWidth = radius * 1.2;
+        const bottomWidth = radius * 2.0;
+        path.moveTo(centerX - topWidth / 2, centerY - radius * 1.0);
+        path.lineTo(centerX + topWidth / 2, centerY - radius * 1.0);
+        path.lineTo(centerX + bottomWidth / 2, centerY + radius * 1.2);
+        path.lineTo(centerX - bottomWidth / 2, centerY + radius * 1.2);
+        path.closePath();
+    }
+    return path;
+}
+
+function drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, activeColor, inactiveColor) {
+    ctx.save();
+    ctx.clip(shapePath);
+    const startOffset = -Math.PI / 2;
+    for (let i = 0; i < den; i++) {
+        const start = startOffset + (i * 2 * Math.PI) / den;
+        const end = startOffset + ((i + 1) * 2 * Math.PI) / den;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, Math.max(w, h), start, end);
+        ctx.closePath();
+        ctx.fillStyle = i < num ? activeColor : inactiveColor;
+        ctx.fill();
+    }
+    ctx.restore();
 }
 
 function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', mostrarFraccion = true, paleta = null) {
@@ -418,6 +491,25 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             ctx.fill();
             ctx.stroke();
         }
+        if (den > 1) {
+            ctx.strokeStyle = '#ffffff55';
+            ctx.lineWidth = 2;
+            for (let i = 1; i < den; i++) {
+                const x = left.x + ((right.x - left.x) * i) / den;
+                ctx.beginPath();
+                ctx.moveTo(x, left.y);
+                ctx.lineTo(top.x, top.y);
+                ctx.stroke();
+            }
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = strokeWidth;
+            ctx.beginPath();
+            ctx.moveTo(top.x, top.y);
+            ctx.lineTo(left.x, left.y);
+            ctx.lineTo(right.x, right.y);
+            ctx.closePath();
+            ctx.stroke();
+        }
     } else if (forma === 'rectangulo') {
         const isHorizontal = orientacion === 'horizontal';
         const rectWidth = isHorizontal ? radius * 1.7 : radius * 1.1;
@@ -436,102 +528,24 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             }
         }
     } else {
-        const squareSize = orientacion === 'horizontal' ? radius * 1.9 : radius * 1.4;
-        const left = centerX - squareSize / 2;
-        const top = centerY - squareSize / 2;
-        const sliceWidth = squareSize / den;
-        for (let i = 0; i < den; i++) {
-            ctx.fillStyle = i < num ? activeColor : inactiveColor;
-            ctx.fillRect(left + sliceWidth * i, top, sliceWidth, squareSize);
-            ctx.strokeRect(left + sliceWidth * i, top, sliceWidth, squareSize);
-        }
-    }
-
-    const formasComplejas = ['pentagono','hexagono','estrella','corazon','semicirculo','rombo','trapecio','octagono'];
-    if (formasComplejas.includes(forma)) {
-        // crear path de la forma para usar como clip
-        let shapePath = new Path2D();
-        if (forma === 'pentagono' || forma === 'hexagono') {
-            const sides = forma === 'pentagono' ? 5 : 6;
-            const pts = [];
-            for (let i = 0; i < sides; i++) {
-                const a = (Math.PI * 2 * i / sides) - Math.PI/2;
-                const x = centerX + Math.cos(a) * radius * 2.2;
-                const y = centerY + Math.sin(a) * radius * 2.2;
-                pts.push({x,y});
+        const formasComplejas = ['pentagono', 'hexagono', 'estrella', 'corazon', 'semicirculo', 'rombo', 'trapecio', 'octagono'];
+        if (formasComplejas.includes(forma)) {
+            const shapePath = createShapePath(forma, centerX, centerY, radius, orientacion);
+            drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, activeColor, inactiveColor);
+            ctx.strokeStyle = '#000000cc';
+            ctx.lineWidth = strokeWidth;
+            ctx.stroke(shapePath);
+        } else {
+            const squareSize = orientacion === 'horizontal' ? radius * 1.9 : radius * 1.4;
+            const left = centerX - squareSize / 2;
+            const top = centerY - squareSize / 2;
+            const sliceWidth = squareSize / den;
+            for (let i = 0; i < den; i++) {
+                ctx.fillStyle = i < num ? activeColor : inactiveColor;
+                ctx.fillRect(left + sliceWidth * i, top, sliceWidth, squareSize);
+                ctx.strokeRect(left + sliceWidth * i, top, sliceWidth, squareSize);
             }
-            shapePath.moveTo(pts[0].x, pts[0].y);
-            for (let i=1;i<pts.length;i++) shapePath.lineTo(pts[i].x, pts[i].y);
-            shapePath.closePath();
-        } else if (forma === 'estrella') {
-            const p = 5; const outerR = radius*2.2; const innerR = radius*0.9;
-            let first = true;
-            for (let i=0;i<p*2;i++){
-                const r = (i%2===0)?outerR:innerR;
-                const a = Math.PI/p * i - Math.PI/2;
-                const x = centerX + Math.cos(a)*r;
-                const y = centerY + Math.sin(a)*r;
-                if (first) { shapePath.moveTo(x,y); first=false; } else shapePath.lineTo(x,y);
-            }
-            shapePath.closePath();
-        } else if (forma === 'rombo') {
-            shapePath.moveTo(centerX, centerY - radius * 1.6);
-            shapePath.lineTo(centerX + radius * 1.3, centerY);
-            shapePath.lineTo(centerX, centerY + radius * 1.6);
-            shapePath.lineTo(centerX - radius * 1.3, centerY);
-            shapePath.closePath();
-        } else if (forma === 'trapecio') {
-            const topWidth = radius * 1.2;
-            const bottomWidth = radius * 2.0;
-            shapePath.moveTo(centerX - topWidth / 2, centerY - radius * 1.0);
-            shapePath.lineTo(centerX + topWidth / 2, centerY - radius * 1.0);
-            shapePath.lineTo(centerX + bottomWidth / 2, centerY + radius * 1.2);
-            shapePath.lineTo(centerX - bottomWidth / 2, centerY + radius * 1.2);
-            shapePath.closePath();
-        } else if (forma === 'octagono') {
-            const sides = 8;
-            for (let i = 0; i < sides; i++) {
-                const a = (Math.PI * 2 * i / sides) - Math.PI/8;
-                const x = centerX + Math.cos(a) * radius * 1.7;
-                const y = centerY + Math.sin(a) * radius * 1.7;
-                if (i === 0) shapePath.moveTo(x, y);
-                else shapePath.lineTo(x, y);
-            }
-            shapePath.closePath();
-        } else if (forma === 'corazon') {
-            // approximate heart
-            const topY = centerY - radius*0.2;
-            shapePath.moveTo(centerX, centerY + radius*0.9);
-            shapePath.bezierCurveTo(centerX + radius*1.2, centerY + radius*0.2, centerX + radius*0.6, centerY - radius*1.1, centerX, topY);
-            shapePath.bezierCurveTo(centerX - radius*0.6, centerY - radius*1.1, centerX - radius*1.2, centerY + radius*0.2, centerX, centerY + radius*0.9);
-            shapePath.closePath();
-        } else if (forma === 'semicirculo') {
-            shapePath.moveTo(centerX - radius*2, centerY);
-            shapePath.arc(centerX, centerY, radius*2, Math.PI, 0, false);
-            shapePath.lineTo(centerX + radius*2, centerY + radius*2);
-            shapePath.lineTo(centerX - radius*2, centerY + radius*2);
-            shapePath.closePath();
         }
-
-        // rellenar por sectores usando clip
-        ctx.save();
-        ctx.clip(shapePath);
-        const startOffset = -Math.PI/2;
-        for (let i=0;i<den;i++){
-            const start = startOffset + (i*2*Math.PI)/den;
-            const end = startOffset + ((i+1)*2*Math.PI)/den;
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, Math.max(w,h), start, end);
-            ctx.closePath();
-            ctx.fillStyle = i < num ? activeColor : inactiveColor;
-            ctx.fill();
-        }
-        ctx.restore();
-        // stroke outline
-        ctx.strokeStyle = '#000000cc';
-        ctx.lineWidth = strokeWidth;
-        ctx.stroke(shapePath);
     }
 
     if (mostrarFraccion) {
