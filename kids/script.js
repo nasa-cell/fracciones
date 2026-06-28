@@ -384,9 +384,10 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
     const activeColor = paleta ? paleta.activo : '#22c55e';
     const inactiveColor = paleta ? paleta.inactivo : '#cbd5e1';
     const strokeWidth = 4;
+    const strokeColor = '#000000cc';
 
     ctx.lineWidth = strokeWidth;
-    ctx.strokeStyle = '#000000cc';
+    ctx.strokeStyle = strokeColor;
 
     if (forma === 'circulo') {
         const startAngleOffset = -Math.PI / 2;
@@ -528,7 +529,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
         }
         ctx.restore();
         // stroke outline
-        ctx.strokeStyle = borderColor;
+        ctx.strokeStyle = '#000000cc';
         ctx.lineWidth = strokeWidth;
         ctx.stroke(shapePath);
     }
