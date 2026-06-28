@@ -769,6 +769,9 @@ h1 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.1);
 }
 .bloque-svg svg { width: 36px; height: 36px; }
 

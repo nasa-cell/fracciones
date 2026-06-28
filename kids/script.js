@@ -180,15 +180,15 @@ const cronicaAventura = [
 
 function crearTemaUsuario() {
     const paletas = shuffleArray(paletasBase);
-    const extras = shuffleArray(['pentagono','hexagono','estrella','corazon','semicirculo']);
+    const extras = shuffleArray(['pentagono','hexagono','estrella','corazon','semicirculo','rombo','trapecio','octagono']);
     const formasPorRonda = [
         ['cuadrado','circulo','rectangulo'],
         ['cuadrado','circulo','rectangulo','triangulo'],
         ['cuadrado','circulo','rectangulo','triangulo', extras[0]],
-        ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1]],
         ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2]],
         ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2], extras[3]],
-        ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2], extras[3], extras[4]]
+        ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2], extras[3], extras[4]],
+        ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2], extras[3], extras[4], extras[5], extras[6], extras[7]]
     ];
     const rangos = cronicaAventura.map((base, index) => {
         const ajuste = Math.floor(Math.random() * 3);
@@ -249,7 +249,7 @@ function generarPregunta() {
         ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono'],
         ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella'],
         ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon'],
-        ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon','semicirculo']
+        ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon','semicirculo','rombo','trapecio','octagono']
     ];
     const paleta = obtenerPaletaRonda(rondaActual);
     const posibles = formasPorRonda[Math.min(rondaActual-1, formasPorRonda.length-1)];
@@ -296,34 +296,46 @@ function dibujarPiezasPequenas(container, forma, num, den, paleta) {
         const pieza = document.createElement('div');
         pieza.className = 'bloque-svg';
         let color = activo ? paleta.activo : paleta.inactivo;
+        let border = activo ? paleta.borde : '#94a3b8';
+        let fondo = activo ? `linear-gradient(135deg, ${paleta.activo}, ${paleta.brillo})` : `linear-gradient(135deg, ${paleta.inactivo}, #e2e8f0)`;
         if (forma === 'circulo') {
             pieza.className = 'bloque-circulo';
-            if (activo) pieza.classList.add('activo'); else pieza.classList.add('inactivo');
+            pieza.style.background = fondo;
+            pieza.style.borderColor = border;
+            pieza.style.boxShadow = activo ? `0 0 12px ${paleta.activo}` : '0 2px 4px rgba(0,0,0,0.15)';
             piezasContenedor.appendChild(pieza);
             continue;
         }
         if (forma === 'triangulo') {
-            pieza.className = 'bloque-triangulo ' + (activo ? 'activo' : 'inactivo');
+            pieza.className = 'bloque-triangulo';
+            pieza.style.borderBottomColor = color;
+            pieza.style.filter = activo ? `drop-shadow(0 0 8px ${paleta.activo})` : 'none';
             piezasContenedor.appendChild(pieza);
             continue;
         }
         if (forma === 'rectangulo') {
-            pieza.className = 'bloque-rectangulo ' + (activo ? 'activo' : 'inactivo');
+            pieza.className = 'bloque-rectangulo';
+            pieza.style.background = fondo;
+            pieza.style.borderColor = border;
             piezasContenedor.appendChild(pieza);
             continue;
         }
 
-        // Figuras SVG para pentágono, hexágono, estrella, corazón, semicirculo
+        // Figuras SVG para pentágono, hexágono, estrella, corazón, semicirculo, rombo, trapecio, octagono
         let svg = '';
-        if (forma === 'pentagono' || forma === 'hexagono') {
-            const sides = forma === 'pentagono' ? 5 : 6;
-            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><polygon points="${generatePolygonPoints(50,50,40,sides)}" fill="${color}" stroke="#ffffff" stroke-width="2"/></svg>`;
+        if (forma === 'pentagono' || forma === 'hexagono' || forma === 'octagono') {
+            const sides = forma === 'pentagono' ? 5 : forma === 'hexagono' ? 6 : 8;
+            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><polygon points="${generatePolygonPoints(50,50,40,sides)}" fill="${color}" stroke="${border}" stroke-width="2"/></svg>`;
         } else if (forma === 'estrella') {
-            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><path d="${starPath(5,50,50,36,16)}" fill="${color}" stroke="#ffffff" stroke-width="2"/></svg>`;
+            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><path d="${starPath(5,50,50,36,16)}" fill="${color}" stroke="${border}" stroke-width="2"/></svg>`;
         } else if (forma === 'corazon') {
-            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><path d="M50 74 L20 44 A14 14 0 0 1 35 20 A18 18 0 0 1 50 34 A18 18 0 0 1 65 20 A14 14 0 0 1 80 44 Z" fill="${color}" stroke="#ffffff" stroke-width="2"/></svg>`;
+            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><path d="M50 74 L20 44 A14 14 0 0 1 35 20 A18 18 0 0 1 50 34 A18 18 0 0 1 65 20 A14 14 0 0 1 80 44 Z" fill="${color}" stroke="${border}" stroke-width="2"/></svg>`;
         } else if (forma === 'semicirculo') {
-            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><path d="M10 50 A40 40 0 0 1 90 50 L90 90 L10 90 Z" fill="${color}" stroke="#ffffff" stroke-width="2"/></svg>`;
+            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><path d="M10 50 A40 40 0 0 1 90 50 L90 90 L10 90 Z" fill="${color}" stroke="${border}" stroke-width="2"/></svg>`;
+        } else if (forma === 'rombo') {
+            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><polygon points="50,10 90,50 50,90 10,50" fill="${color}" stroke="${border}" stroke-width="2"/></svg>`;
+        } else if (forma === 'trapecio') {
+            svg = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><polygon points="20,25 80,25 70,75 30,75" fill="${color}" stroke="${border}" stroke-width="2"/></svg>`;
         } else {
             // fallback cuadrado
             pieza.className = 'bloque-mat ' + (activo ? 'activo' : 'inactivo');
@@ -369,28 +381,10 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
     const centerX = w / 2;
     const centerY = h / 2;
     const radius = Math.min(w, h) * 0.33;
-    let activeColor = paleta ? paleta.activo : '#22c55e';
+    const activeColor = paleta ? paleta.activo : '#22c55e';
     const inactiveColor = paleta ? paleta.inactivo : '#cbd5e1';
-    let borderColor = paleta ? paleta.borde + 'cc' : '#ffffffcc';
+    const borderColor = paleta ? paleta.borde + 'cc' : '#ffffffcc';
     const strokeWidth = 3;
-
-    if (paleta) {
-        activeColor = paleta.activo;
-        borderColor = paleta.borde + 'cc';
-    }
-    if (forma === 'circulo') {
-        activeColor = paleta ? '#60a5fa' : '#3b82f6';
-        borderColor = paleta ? '#93c5fdcc' : '#93c5fdcc';
-    } else if (forma === 'triangulo') {
-        activeColor = paleta ? '#fbbf24' : '#f59e0b';
-        borderColor = paleta ? '#fde68a99' : '#fbbf24cc';
-    } else if (forma === 'rectangulo') {
-        activeColor = paleta ? '#ec4899' : '#ec4899';
-        borderColor = paleta ? '#fbcfe8cc' : '#f9a8d4cc';
-    } else if (forma === 'cuadrado') {
-        activeColor = paleta ? paleta.activo : '#22c55e';
-        borderColor = paleta ? paleta.borde + 'cc' : '#86efaccc';
-    }
 
     ctx.lineWidth = strokeWidth;
     ctx.strokeStyle = borderColor;
@@ -453,8 +447,8 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
         }
     }
 
-    // Nuevas formas: pentágono, hexágono, estrella, corazón, semicirculo
-    if (['pentagono','hexagono','estrella','corazon','semicirculo'].includes(forma)) {
+    const formasComplejas = ['pentagono','hexagono','estrella','corazon','semicirculo','rombo','trapecio','octagono'];
+    if (formasComplejas.includes(forma)) {
         // crear path de la forma para usar como clip
         let shapePath = new Path2D();
         if (forma === 'pentagono' || forma === 'hexagono') {
@@ -478,6 +472,30 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
                 const x = centerX + Math.cos(a)*r;
                 const y = centerY + Math.sin(a)*r;
                 if (first) { shapePath.moveTo(x,y); first=false; } else shapePath.lineTo(x,y);
+            }
+            shapePath.closePath();
+        } else if (forma === 'rombo') {
+            shapePath.moveTo(centerX, centerY - radius * 1.6);
+            shapePath.lineTo(centerX + radius * 1.3, centerY);
+            shapePath.lineTo(centerX, centerY + radius * 1.6);
+            shapePath.lineTo(centerX - radius * 1.3, centerY);
+            shapePath.closePath();
+        } else if (forma === 'trapecio') {
+            const topWidth = radius * 1.2;
+            const bottomWidth = radius * 2.0;
+            shapePath.moveTo(centerX - topWidth / 2, centerY - radius * 1.0);
+            shapePath.lineTo(centerX + topWidth / 2, centerY - radius * 1.0);
+            shapePath.lineTo(centerX + bottomWidth / 2, centerY + radius * 1.2);
+            shapePath.lineTo(centerX - bottomWidth / 2, centerY + radius * 1.2);
+            shapePath.closePath();
+        } else if (forma === 'octagono') {
+            const sides = 8;
+            for (let i = 0; i < sides; i++) {
+                const a = (Math.PI * 2 * i / sides) - Math.PI/8;
+                const x = centerX + Math.cos(a) * radius * 1.7;
+                const y = centerY + Math.sin(a) * radius * 1.7;
+                if (i === 0) shapePath.moveTo(x, y);
+                else shapePath.lineTo(x, y);
             }
             shapePath.closePath();
         } else if (forma === 'corazon') {
