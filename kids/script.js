@@ -274,11 +274,11 @@ function generarPregunta() {
 
 function crearCanvasForma(container) {
     const canvas = document.createElement('canvas');
-    canvas.width = 260;
-    canvas.height = 260;
+    canvas.width = 320;
+    canvas.height = 320;
     canvas.className = 'shape-canvas';
-    canvas.style.width = '260px';
-    canvas.style.height = '260px';
+    canvas.style.width = '320px';
+    canvas.style.height = '320px';
     container.appendChild(canvas);
     return canvas;
 }
@@ -380,14 +380,13 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
 
     const centerX = w / 2;
     const centerY = h / 2;
-    const radius = Math.min(w, h) * 0.33;
+    const radius = Math.min(w, h) * 0.38;
     const activeColor = paleta ? paleta.activo : '#22c55e';
     const inactiveColor = paleta ? paleta.inactivo : '#cbd5e1';
-    const borderColor = paleta ? paleta.borde + 'cc' : '#ffffffcc';
-    const strokeWidth = 3;
+    const strokeWidth = 4;
 
     ctx.lineWidth = strokeWidth;
-    ctx.strokeStyle = borderColor;
+    ctx.strokeStyle = '#000000cc';
 
     if (forma === 'circulo') {
         const startAngleOffset = -Math.PI / 2;
