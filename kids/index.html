@@ -7,11 +7,11 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<video id="bg-video" autoplay muted loop playsinline preload="auto">
-  <source src="../fondo%20de%20niños.mp4" type="video/mp4">
-</video>
-<audio id="bg-audio" loop preload="auto">
+<audio id="bg-audio" preload="auto">
   <source src="../fondo%20de%20sonido.mp3" type="audio/mpeg">
+</audio>
+<audio id="bg-audio-2" preload="auto">
+  <source src="../fondo%20de%20sonido2.mp3" type="audio/mpeg">
 </audio>
 <div class="contenedor">
 
@@ -35,8 +35,6 @@
         <div class="subtitulo">Las 7 Pruebas Celestiales</div>
 
         <div class="info">
-            <div>❤️ Vida Héroe <span id="vidaJugadorTxt">100</span></div>
-            <div>😈 Vida Rival <span id="vidaEnemigoTxt">100</span></div>
             <div>🔰 Batalla <span id="rondaTxt">1 / 7</span></div>
             <div>📌 Problema <span id="problemaTxt">1 / 8</span></div>
             <div>🏆 Puntos <span id="puntos">0</span></div>
@@ -48,13 +46,19 @@
             </div>
         </div>
 
+        <div class="disparos-container" id="disparosContainer"></div>
+
         <div class="arena">
             <div class="personaje">
                 <div class="sprite-container">
                     <div id="heroe" class="sprite">🧙‍♂️</div>
+                    <div id="heroeDaño" class="daño-overlay"></div>
                 </div>
-                <div class="vida">
-                    <div id="vidaJugador" class="barra"></div>
+                <div class="vida-info">
+                    <div class="vida">
+                        <div id="vidaJugador" class="barra"></div>
+                    </div>
+                    <div class="vida-texto">❤️ <span id="vidaJugadorTxt">100</span></div>
                 </div>
                 <h3 id="heroeNombre">Mago Aprendiz</h3>
                 <div class="rol">Héroe</div>
@@ -65,9 +69,13 @@
             <div class="personaje">
                 <div class="sprite-container">
                     <div id="enemigo" class="sprite">👾</div>
+                    <div id="enemigoDaño" class="daño-overlay"></div>
                 </div>
-                <div class="vida">
-                    <div id="vidaEnemigo" class="barra" style="background: linear-gradient(90deg, #ef4444, #f87171); box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);"></div>
+                <div class="vida-info">
+                    <div class="vida">
+                        <div id="vidaEnemigo" class="barra" style="background: linear-gradient(90deg, #ef4444, #f87171); box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);"></div>
+                    </div>
+                    <div class="vida-texto">😈 <span id="vidaEnemigoTxt">100</span></div>
                 </div>
                 <h3 id="enemigoNombre">Slime de Virus</h3>
                 <div class="rol">Rival</div>

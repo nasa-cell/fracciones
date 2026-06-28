@@ -23,14 +23,31 @@ function seleccionarAvatar(avatar) {
 
 function activarSonido() {
     const bgAudio = document.getElementById('bg-audio');
+    const bgAudio2 = document.getElementById('bg-audio-2');
     if (bgAudio) {
         bgAudio.muted = false;
         bgAudio.volume = 0.28;
-        bgAudio.loop = true;
         bgAudio.load();
         bgAudio.play().catch((error) => {
             console.warn('No se pudo reproducir el audio de fondo:', error);
         });
+        
+        // Cuando termine el primer audio, inicia el segundo
+        bgAudio.addEventListener('ended', function() {
+            if (bgAudio2) {
+                bgAudio2.muted = false;
+                bgAudio2.volume = 0.28;
+                bgAudio2.load();
+                bgAudio2.play().catch((error) => {
+                    console.warn('No se pudo reproducir el audio 2 de fondo:', error);
+                });
+                
+                // Cuando termine el segundo, vuelve a reproducir el primero
+                bgAudio2.addEventListener('ended', function() {
+                    activarSonido();
+                }, { once: true });
+            }
+        }, { once: true });
     }
 }
 
@@ -192,12 +209,70 @@ function actualizar() {
     document.getElementById("vidaJugador").style.width = `${Math.max(0, Math.min(100, (vidaJugador / VIDA_MAX_JUGADOR) * 100))}%`;
     document.getElementById("vidaEnemigo").style.width = `${Math.max(0, Math.min(100, (vidaEnemigo / VIDA_MAX_ENEMIGO) * 100))}%`;
 
+    // Aplicar efectos de daño visual
+    let porcentajeDañoHeroe = 1 - (vidaJugador / VIDA_MAX_JUGADOR);
+    let porcentajeDañoEnemigo = 1 - (vidaEnemigo / VIDA_MAX_ENEMIGO);
+    
+    let heroeSprite = document.getElementById("heroe");
+    let enemigoSprite = document.getElementById("enemigo");
+    let heroDaño = document.getElementById("heroeDaño");
+    let enemigoDaño = document.getElementById("enemigoDaño");
+    
+    // Mostrar rajaduras según el daño - más notorio conforme aumenta
+    heroDaño.style.opacity = Math.min(1, porcentajeDañoHeroe * 3);
+    enemigoDaño.style.opacity = Math.min(1, porcentajeDañoEnemigo * 3);
+    
+    // Escala de rajaduras: más grandes conforme hay más daño
+    let escalaRajaduraHeroe = 1 + (porcentajeDañoHeroe * 0.5);
+    let escalaRajaduraEnemigo = 1 + (porcentajeDañoEnemigo * 0.5);
+    heroDaño.style.transform = `translate(-50%, -50%) scale(${escalaRajaduraHeroe})`;
+    enemigoDaño.style.transform = `translate(-50%, -50%) scale(${escalaRajaduraEnemigo})`;
+    
+    // Efecto: Escala reducida + Rotación
+    let escalaHeroe = 1 - (porcentajeDañoHeroe * 0.2);
+    let rotacionHeroe = porcentajeDañoHeroe * 8;
+    let briHeroHeroe = 1 - (porcentajeDañoHeroe * 0.4);
+    heroeSprite.style.transform = `scale(${escalaHeroe}) rotate(${rotacionHeroe}deg)`;
+    heroeSprite.style.filter = `brightness(${briHeroHeroe})`;
+    
+    let escalaEnemigo = 1 - (porcentajeDañoEnemigo * 0.2);
+    let rotacionEnemigo = porcentajeDañoEnemigo * 8;
+    let brightnessEnemigo = 1 - (porcentajeDañoEnemigo * 0.4);
+    enemigoSprite.style.transform = `scale(${escalaEnemigo}) rotate(${rotacionEnemigo}deg)`;
+    enemigoSprite.style.filter = `brightness(${brightnessEnemigo})`;
+
     document.getElementById("puntos").innerHTML = puntos;
     document.getElementById("rondaTxt").innerHTML = `${rondaActual} / 7`;
     document.getElementById("problemaTxt").innerHTML = `${Math.min(problemaActual, PROBLEMAS_POR_ENEMIGO)} / ${PROBLEMAS_POR_ENEMIGO}`;
 
     let progresoAventura = ((rondaActual - 1) / 7) * 100;
     document.getElementById("xpBar").style.width = progresoAventura + "%";
+}
+
+function crearDisparo(esDelHeroe) {
+    const container = document.getElementById("disparosContainer");
+    const disparo = document.createElement("div");
+    disparo.classList.add("disparo");
+    
+    if (esDelHeroe) {
+        disparo.classList.add("disparo-heroe", "heroe-ataca");
+    } else {
+        disparo.classList.add("disparo-enemigo", "enemigo-ataca");
+    }
+    
+    container.appendChild(disparo);
+    
+    setTimeout(() => {
+        disparo.remove();
+    }, 600);
+}
+
+function crearMultiplesDisparos(esDelHeroe, cantidad = 5) {
+    for (let i = 0; i < cantidad; i++) {
+        setTimeout(() => {
+            crearDisparo(esDelHeroe);
+        }, i * 80);
+    }
 }
 
 function verificar() {
@@ -225,6 +300,8 @@ function verificar() {
 
         let daño = 10;
         vidaEnemigo -= daño;
+
+        crearMultiplesDisparos(true, 5);
 
         heroeSprite.classList.add("atacarIzq");
         setTimeout(() => {
@@ -264,6 +341,8 @@ function verificar() {
         mensajeBox.innerHTML = `❌ ¡FALLASTE! La respuesta correcta era ${num}/${den}`;
 
         vidaJugador -= 25;
+
+        crearMultiplesDisparos(false, 5);
 
         enemigoSprite.classList.add("atacarDer");
         setTimeout(() => {
