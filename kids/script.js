@@ -31,34 +31,50 @@ function seleccionarAvatar(avatar) {
     });
 }
 
-function activarSonido() {
-    const bgAudio = document.getElementById('bg-audio');
-    const bgAudio2 = document.getElementById('bg-audio-2');
-    if (bgAudio) {
-        try {
-            bgAudio.muted = false;
-            bgAudio.volume = 0.28;
-            bgAudio.loop = true;
-            bgAudio.load();
-            bgAudio.play().catch((error) => { console.warn('No se pudo reproducir el audio de fondo:', error); });
-        } catch (e) { console.warn('activarSonido bgAudio error', e); }
-        
-        // Cuando termine el primer audio, inicia el segundo
-        bgAudio.addEventListener('ended', function() {
-            if (bgAudio2) {
-                bgAudio2.muted = false;
-                bgAudio2.volume = 0.28;
-                bgAudio2.loop = false;
-                bgAudio2.load();
-                bgAudio2.play().catch((error) => { console.warn('No se pudo reproducir el audio 2 de fondo:', error); });
+function reproducirAudio(audio, { volumen = 0.28, loop = false } = {}) {
+    if (!audio) return;
 
-                // Cuando termine el segundo, vuelve a reproducir el primero
-                bgAudio2.addEventListener('ended', function() {
-                    try { bgAudio.play().catch(()=>{}); } catch(e){}
-                }, { once: true });
-            }
-        }, { once: true });
+    try {
+        audio.muted = false;
+        audio.volume = volumen;
+        audio.loop = loop;
+        audio.currentTime = 0;
+        audio.load();
+        const playPromise = audio.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch((error) => {
+                console.warn('No se pudo reproducir el audio:', error);
+            });
+        }
+    } catch (e) {
+        console.warn('No se pudo preparar el audio:', e);
     }
+}
+
+function activarSonido() {
+    const sonidosFondo = [
+        document.getElementById('bg-audio'),
+        document.getElementById('bg-audio-2'),
+        document.getElementById('bg-audio-3'),
+        document.getElementById('bg-audio-4')
+    ].filter(Boolean);
+
+    if (sonidosFondo.length === 0) return;
+
+    let indiceActual = 0;
+
+    const reproducirSiguiente = () => {
+        const audioActual = sonidosFondo[indiceActual];
+        if (!audioActual) return;
+
+        reproducirAudio(audioActual, { volumen: 0.28, loop: false });
+        audioActual.onended = () => {
+            indiceActual = (indiceActual + 1) % sonidosFondo.length;
+            reproducirSiguiente();
+        };
+    };
+
+    reproducirSiguiente();
 }
 
 function ingresarJuego() {
