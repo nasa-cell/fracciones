@@ -1,4 +1,4 @@
-const VIDA_MAX_JUGADOR = 70;
+const VIDA_MAX_JUGADOR = 90;
 const VIDA_MAX_ENEMIGO = 50;
 let vidaJugador = VIDA_MAX_JUGADOR;
 let vidaEnemigo = VIDA_MAX_ENEMIGO;
@@ -191,7 +191,10 @@ const cronicaAventura = [
     { ronda: 4, heroe: "🥷", heroeN: "Ninja de las Sombras", enemigo: "👹", enemigoN: "Ogro Feroz", minDen: 9, maxDen: 12 },
     { ronda: 5, heroe: "🧜‍♂️", heroeN: "Rey de los Mares", enemigo: "🦑", enemigoN: "Kraken Marino", minDen: 11, maxDen: 15 },
     { ronda: 6, heroe: "🧝‍♀️", heroeN: "Elfa de la Luz", enemigo: "💀", enemigoN: "Señor de la Muerte", minDen: 13, maxDen: 18 },
-    { ronda: 7, heroe: "👑", heroeN: "Paladín Supremo", enemigo: "🐲", enemigoN: "Dragón del Caos", minDen: 15, maxDen: 22 }
+    { ronda: 7, heroe: "👑", heroeN: "Paladín Supremo", enemigo: "🐲", enemigoN: "Dragón del Caos", minDen: 15, maxDen: 22 },
+    { ronda: 8, heroe: "⚡", heroeN: "Druida Trueno", enemigo: "🧟", enemigoN: "Espectro Abisal", minDen: 17, maxDen: 24 },
+    { ronda: 9, heroe: "🌙", heroeN: "Guardían Nocturno", enemigo: "👿", enemigoN: "Señor de las Sombras", minDen: 19, maxDen: 26 },
+    { ronda: 10, heroe: "🔥", heroeN: "Guardían de Fuego", enemigo: "🐉", enemigoN: "Dragón Supremo", minDen: 21, maxDen: 28 }
 ];
 
 function crearTemaUsuario() {
@@ -201,9 +204,12 @@ function crearTemaUsuario() {
         ['cuadrado','circulo','rectangulo'],
         ['cuadrado','circulo','rectangulo','triangulo'],
         ['cuadrado','circulo','rectangulo','triangulo', extras[0]],
+        ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1]],
         ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2]],
         ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2], extras[3]],
         ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2], extras[3], extras[4]],
+        ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2], extras[3], extras[4], extras[5]],
+        ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2], extras[3], extras[4], extras[5], extras[6]],
         ['cuadrado','circulo','rectangulo','triangulo', extras[0], extras[1], extras[2], extras[3], extras[4], extras[5], extras[6], extras[7]]
     ];
     const rangos = cronicaAventura.map((base, index) => {
@@ -235,7 +241,7 @@ function obtenerPaletaRonda(ronda) {
 }
 
 function generarPregunta() {
-    if (rondaActual > 7) {
+    if (rondaActual > 10) {
         terminarJuego(true);
         return;
     }
@@ -518,8 +524,24 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             ctx.closePath();
             ctx.fillStyle = activeColor;
             ctx.fill();
+        }
+
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth;
+        for (let i = 0; i < den; i++) {
+            const angle = startAngleOffset + (i * 2 * Math.PI) / den;
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(x, y);
             ctx.stroke();
         }
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.stroke();
     } else if (forma === 'triangulo') {
         const top = { x: centerX, y: orientacion === 'vertical' ? centerY - radius * 0.95 : centerY + radius * 0.95 };
         const left = { x: centerX - radius, y: orientacion === 'vertical' ? centerY + radius * 0.8 : centerY - radius * 0.8 };
@@ -532,8 +554,11 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
         ctx.closePath();
         ctx.fillStyle = inactiveColor;
         ctx.fill();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth;
         ctx.stroke();
 
+        ctx.fillStyle = activeColor;
         for (let i = 0; i < num; i++) {
             const x1 = left.x + ((right.x - left.x) * i) / den;
             const x2 = left.x + ((right.x - left.x) * (i + 1)) / den;
@@ -542,29 +567,26 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             ctx.lineTo(x1, left.y);
             ctx.lineTo(x2, left.y);
             ctx.closePath();
-            ctx.fillStyle = activeColor;
             ctx.fill();
             ctx.stroke();
         }
-        if (den > 1) {
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 10;
-            for (let i = 1; i < den; i++) {
-                const x = left.x + ((right.x - left.x) * i) / den;
-                ctx.beginPath();
-                ctx.moveTo(x, left.y);
-                ctx.lineTo(top.x, top.y);
-                ctx.stroke();
-            }
-            ctx.strokeStyle = strokeColor;
-            ctx.lineWidth = strokeWidth;
+
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth;
+        for (let i = 1; i < den; i++) {
+            const x = left.x + ((right.x - left.x) * i) / den;
             ctx.beginPath();
             ctx.moveTo(top.x, top.y);
-            ctx.lineTo(left.x, left.y);
-            ctx.lineTo(right.x, right.y);
-            ctx.closePath();
+            ctx.lineTo(x, left.y);
             ctx.stroke();
         }
+
+        ctx.beginPath();
+        ctx.moveTo(top.x, top.y);
+        ctx.lineTo(left.x, left.y);
+        ctx.lineTo(right.x, right.y);
+        ctx.closePath();
+        ctx.stroke();
     } else if (forma === 'rectangulo') {
         const isHorizontal = orientacion === 'horizontal';
         const rectWidth = isHorizontal ? radius * 1.7 : radius * 1.1;
@@ -575,16 +597,36 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
 
         ctx.fillStyle = inactiveColor;
         ctx.fillRect(left, top, rectWidth, rectHeight);
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth;
         ctx.strokeRect(left, top, rectWidth, rectHeight);
 
+        ctx.fillStyle = activeColor;
         for (let i = 0; i < num; i++) {
-            ctx.fillStyle = activeColor;
             if (isHorizontal) {
                 ctx.fillRect(left + sliceSize * i, top, sliceSize, rectHeight);
-                ctx.strokeRect(left + sliceSize * i, top, sliceSize, rectHeight);
             } else {
                 ctx.fillRect(left, top + sliceSize * i, rectWidth, sliceSize);
-                ctx.strokeRect(left, top + sliceSize * i, rectWidth, sliceSize);
+            }
+        }
+
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth;
+        if (isHorizontal) {
+            for (let i = 1; i < den; i++) {
+                const x = left + sliceSize * i;
+                ctx.beginPath();
+                ctx.moveTo(x, top);
+                ctx.lineTo(x, top + rectHeight);
+                ctx.stroke();
+            }
+        } else {
+            for (let i = 1; i < den; i++) {
+                const y = top + sliceSize * i;
+                ctx.beginPath();
+                ctx.moveTo(left, y);
+                ctx.lineTo(left + rectWidth, y);
+                ctx.stroke();
             }
         }
     } else {
@@ -600,10 +642,26 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             const left = centerX - squareSize / 2;
             const top = centerY - squareSize / 2;
             const sliceWidth = squareSize / den;
-            for (let i = 0; i < den; i++) {
-                ctx.fillStyle = i < num ? activeColor : inactiveColor;
+
+            ctx.fillStyle = inactiveColor;
+            ctx.fillRect(left, top, squareSize, squareSize);
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = strokeWidth;
+            ctx.strokeRect(left, top, squareSize, squareSize);
+
+            ctx.fillStyle = activeColor;
+            for (let i = 0; i < num; i++) {
                 ctx.fillRect(left + sliceWidth * i, top, sliceWidth, squareSize);
-                ctx.strokeRect(left + sliceWidth * i, top, sliceWidth, squareSize);
+            }
+
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = strokeWidth;
+            for (let i = 1; i < den; i++) {
+                const x = left + sliceWidth * i;
+                ctx.beginPath();
+                ctx.moveTo(x, top);
+                ctx.lineTo(x, top + squareSize);
+                ctx.stroke();
             }
         }
     }
@@ -672,7 +730,7 @@ function actualizar() {
     const problemaElem = document.getElementById("problemaTxt");
 
     if (puntosElem) puntosElem.innerHTML = puntos;
-    if (rondaElem) rondaElem.innerHTML = `${rondaActual} / 7`;
+    if (rondaElem) rondaElem.innerHTML = `${rondaActual} / 10`;
     if (problemaElem) problemaElem.innerHTML = `${Math.min(problemaActual, PROBLEMAS_POR_ENEMIGO)} / ${PROBLEMAS_POR_ENEMIGO}`;
 }
 
@@ -748,7 +806,7 @@ function verificar() {
                 
                 rondaActual++;
                 problemaActual = 1;
-                if (rondaActual > 7) {
+                if (rondaActual > 10) {
                     terminarJuego(true);
                 } else {
                     mensajeBox.innerHTML = "✨ ¡Rival derrotado! Viajando al siguiente reino...";
@@ -767,7 +825,7 @@ function verificar() {
         mensajeBox.style.color = "#f87171";
         mensajeBox.innerHTML = `❌ ¡FALLASTE! La respuesta correcta era ${num}/${den}`;
 
-        vidaJugador -= 25;
+        vidaJugador -= 10;
 
         crearMultiplesDisparos(false, 5);
 
@@ -824,6 +882,7 @@ function reiniciarJuego() {
     problemaActual = 1;
     temaUsuario = crearTemaUsuario();
     usedProblemas.clear();
+    bloqueado = false;
     
     document.getElementById("moduloFinal").classList.add("oculto");
     document.getElementById("moduloJuego").classList.remove("oculto");
