@@ -451,6 +451,7 @@ function drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, fil
     const radius = Math.max(w, h);
     ctx.lineWidth = 10;
     ctx.strokeStyle = '#000000';
+
     for (let i = 0; i < den; i++) {
         const start = startOffset + (i * 2 * Math.PI) / den;
         const end = startOffset + ((i + 1) * 2 * Math.PI) / den;
@@ -462,11 +463,13 @@ function drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, fil
         ctx.fill();
         ctx.stroke();
     }
+
     ctx.restore();
 
     ctx.save();
     ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 10;
+
     for (let i = 0; i < den; i++) {
         const angle = startOffset + (i * 2 * Math.PI) / den;
         const x = centerX + Math.cos(angle) * radius;
@@ -476,6 +479,7 @@ function drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, fil
         ctx.lineTo(x, y);
         ctx.stroke();
     }
+
     ctx.restore();
 }
 
