@@ -280,7 +280,7 @@ function generarPregunta() {
         ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon','semicirculo','rombo','trapecio'],
         ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon','semicirculo','rombo','trapecio','octagono']
     ];
-    const paleta = obtenerPaletaRonda(rondaActual);
+    const paleta = obtenerPaletaRonda(rondaActual) || paletasBase[0];
     let posibles = formasPorRonda[Math.min(rondaActual-1, formasPorRonda.length-1)];
     if (!Array.isArray(posibles) || posibles.length === 0) {
         posibles = ['cuadrado', 'circulo', 'rectangulo'];
@@ -318,6 +318,12 @@ function crearCanvasForma(container) {
 }
 
 function dibujarPiezasPequenas(container, forma, num, den, paleta) {
+    paleta = paleta || {
+        activo: '#22c55e',
+        inactivo: '#cbd5e1',
+        borde: '#000000',
+        brillo: '#bef264'
+    };
     container.className = 'bloques-container';
     container.style.cssText = '';
     const piezasContenedor = document.createElement('div');
