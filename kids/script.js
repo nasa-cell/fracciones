@@ -493,7 +493,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
     const centerY = h / 2;
     const radius = Math.min(w, h) * 0.38;
     const activeColor = '#f97316';
-    const inactiveColor = '#f8fafc';
+    const inactiveColor = '#ffffff';
     const strokeWidth = 10;
     const strokeColor = '#000000';
 
@@ -501,15 +501,22 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
     ctx.strokeStyle = strokeColor;
 
     if (forma === 'circulo') {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fillStyle = inactiveColor;
+        ctx.fill();
+        ctx.stroke();
+
         const startAngleOffset = -Math.PI / 2;
-        for (let i = 0; i < den; i++) {
+        for (let i = 0; i < num; i++) {
             const startAngle = startAngleOffset + (i * 2 * Math.PI) / den;
             const endAngle = startAngleOffset + ((i + 1) * 2 * Math.PI) / den;
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, startAngle, endAngle);
             ctx.closePath();
-            ctx.fillStyle = i < num ? activeColor : inactiveColor;
+            ctx.fillStyle = activeColor;
             ctx.fill();
             ctx.stroke();
         }
@@ -517,7 +524,17 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
         const top = { x: centerX, y: orientacion === 'vertical' ? centerY - radius * 0.95 : centerY + radius * 0.95 };
         const left = { x: centerX - radius, y: orientacion === 'vertical' ? centerY + radius * 0.8 : centerY - radius * 0.8 };
         const right = { x: centerX + radius, y: orientacion === 'vertical' ? centerY + radius * 0.8 : centerY - radius * 0.8 };
-        for (let i = 0; i < den; i++) {
+
+        ctx.beginPath();
+        ctx.moveTo(top.x, top.y);
+        ctx.lineTo(left.x, left.y);
+        ctx.lineTo(right.x, right.y);
+        ctx.closePath();
+        ctx.fillStyle = inactiveColor;
+        ctx.fill();
+        ctx.stroke();
+
+        for (let i = 0; i < num; i++) {
             const x1 = left.x + ((right.x - left.x) * i) / den;
             const x2 = left.x + ((right.x - left.x) * (i + 1)) / den;
             ctx.beginPath();
@@ -525,7 +542,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             ctx.lineTo(x1, left.y);
             ctx.lineTo(x2, left.y);
             ctx.closePath();
-            ctx.fillStyle = i < num ? activeColor : inactiveColor;
+            ctx.fillStyle = activeColor;
             ctx.fill();
             ctx.stroke();
         }
@@ -555,8 +572,13 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
         const left = centerX - rectWidth / 2;
         const top = centerY - rectHeight / 2;
         const sliceSize = isHorizontal ? rectWidth / den : rectHeight / den;
-        for (let i = 0; i < den; i++) {
-            ctx.fillStyle = i < num ? activeColor : inactiveColor;
+
+        ctx.fillStyle = inactiveColor;
+        ctx.fillRect(left, top, rectWidth, rectHeight);
+        ctx.strokeRect(left, top, rectWidth, rectHeight);
+
+        for (let i = 0; i < num; i++) {
+            ctx.fillStyle = activeColor;
             if (isHorizontal) {
                 ctx.fillRect(left + sliceSize * i, top, sliceSize, rectHeight);
                 ctx.strokeRect(left + sliceSize * i, top, sliceSize, rectHeight);
