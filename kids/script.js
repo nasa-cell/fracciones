@@ -444,19 +444,37 @@ function createShapePath(forma, centerX, centerY, radius, orientacion) {
     return path;
 }
 
-function drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, activeColor, inactiveColor) {
+function drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, fillColor) {
     ctx.save();
     ctx.clip(shapePath);
     const startOffset = -Math.PI / 2;
+    const radius = Math.max(w, h);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#000000';
     for (let i = 0; i < den; i++) {
         const start = startOffset + (i * 2 * Math.PI) / den;
         const end = startOffset + ((i + 1) * 2 * Math.PI) / den;
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, Math.max(w, h), start, end);
+        ctx.arc(centerX, centerY, radius, start, end);
         ctx.closePath();
-        ctx.fillStyle = i < num ? activeColor : inactiveColor;
+        ctx.fillStyle = fillColor;
         ctx.fill();
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 4;
+    for (let i = 0; i < den; i++) {
+        const angle = startOffset + (i * 2 * Math.PI) / den;
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
     }
     ctx.restore();
 }
@@ -470,10 +488,9 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
     const centerX = w / 2;
     const centerY = h / 2;
     const radius = Math.min(w, h) * 0.38;
-    const activeColor = paleta ? paleta.activo : '#22c55e';
-    const inactiveColor = paleta ? paleta.inactivo : '#cbd5e1';
-    const strokeWidth = 4;
-    const strokeColor = '#000000cc';
+    const fillColor = '#f97316';
+    const strokeWidth = 6;
+    const strokeColor = '#000000';
 
     ctx.lineWidth = strokeWidth;
     ctx.strokeStyle = strokeColor;
@@ -508,8 +525,8 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             ctx.stroke();
         }
         if (den > 1) {
-            ctx.strokeStyle = '#ffffff55';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 4;
             for (let i = 1; i < den; i++) {
                 const x = left.x + ((right.x - left.x) * i) / den;
                 ctx.beginPath();
@@ -547,7 +564,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
         const formasComplejas = ['pentagono', 'hexagono', 'estrella', 'corazon', 'semicirculo', 'rombo', 'trapecio', 'octagono'];
         if (formasComplejas.includes(forma)) {
             const shapePath = createShapePath(forma, centerX, centerY, radius, orientacion);
-            drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, activeColor, inactiveColor);
+            drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, fillColor);
             ctx.strokeStyle = '#000000cc';
             ctx.lineWidth = strokeWidth;
             ctx.stroke(shapePath);
