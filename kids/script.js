@@ -271,16 +271,24 @@ function generarPregunta() {
         ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono'],
         ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella'],
         ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon'],
+        ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon','semicirculo'],
+        ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon','semicirculo','rombo'],
+        ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon','semicirculo','rombo','trapecio'],
         ['cuadrado','circulo','rectangulo','triangulo','pentagono','hexagono','estrella','corazon','semicirculo','rombo','trapecio','octagono']
     ];
     const paleta = obtenerPaletaRonda(rondaActual);
-    const posibles = formasPorRonda[Math.min(rondaActual-1, formasPorRonda.length-1)];
-    const formaActual = posibles[Math.floor(Math.random() * posibles.length)];
+    let posibles = formasPorRonda[Math.min(rondaActual-1, formasPorRonda.length-1)];
+    if (!Array.isArray(posibles) || posibles.length === 0) {
+        posibles = ['cuadrado', 'circulo', 'rectangulo'];
+    }
     const orientaciones = ['vertical', 'horizontal'];
     const orientacion = orientaciones[Math.floor(Math.random() * orientaciones.length)];
     
     // Dos pequeñas, luego dos grandes, dos pequeñas, dos grandes...
     const modoVisual = (Math.floor((problemaActual - 1) / 2) % 2) === 0 ? 'pequenasFiguras' : 'formaGrande';
+    const formaActual = modoVisual === 'formaGrande'
+        ? ['circulo', 'rectangulo'][Math.floor(Math.random() * 2)]
+        : posibles[Math.floor(Math.random() * posibles.length)];
     
     if (modoVisual === 'formaGrande') {
         const canvas = crearCanvasForma(bloquesArea);
@@ -451,12 +459,18 @@ function createShapePath(forma, centerX, centerY, radius, orientacion) {
 }
 
 function drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, activeColor, inactiveColor) {
-    ctx.save();
-    ctx.clip(shapePath);
+    const separatorWidth = 3;
+    const outlineColor = '#000000';
     const startOffset = -Math.PI / 2;
-    const radius = Math.max(w, h);
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = '#000000';
+    const radius = Math.min(w, h) * 0.45;
+
+    ctx.save();
+    ctx.fillStyle = inactiveColor;
+    ctx.fill(shapePath);
+    ctx.strokeStyle = outlineColor;
+    ctx.lineWidth = separatorWidth * 2;
+    ctx.stroke(shapePath);
+    ctx.clip(shapePath);
 
     for (let i = 0; i < den; i++) {
         const start = startOffset + (i * 2 * Math.PI) / den;
@@ -467,15 +481,13 @@ function drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, act
         ctx.closePath();
         ctx.fillStyle = i < num ? activeColor : inactiveColor;
         ctx.fill();
-        ctx.stroke();
     }
 
     ctx.restore();
 
     ctx.save();
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 10;
-
+    ctx.strokeStyle = outlineColor;
+    ctx.lineWidth = separatorWidth;
     for (let i = 0; i < den; i++) {
         const angle = startOffset + (i * 2 * Math.PI) / den;
         const x = centerX + Math.cos(angle) * radius;
@@ -485,7 +497,6 @@ function drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, act
         ctx.lineTo(x, y);
         ctx.stroke();
     }
-
     ctx.restore();
 }
 
@@ -498,10 +509,13 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
     const centerX = w / 2;
     const centerY = h / 2;
     const radius = Math.min(w, h) * 0.38;
-    const activeColor = '#f97316';
+    const activeColor = '#22c55e';
     const inactiveColor = '#ffffff';
-    const strokeWidth = 10;
-    const strokeColor = '#000000';
+    const borderColor = paleta?.borde || '#475569';
+    const strokeColor = borderColor;
+    const separatorColor = '#000000';
+    const strokeWidth = 6;
+    const separatorWidth = 3;
 
     ctx.lineWidth = strokeWidth;
     ctx.strokeStyle = strokeColor;
@@ -526,8 +540,8 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             ctx.fill();
         }
 
-        ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = strokeWidth;
+        ctx.strokeStyle = separatorColor;
+        ctx.lineWidth = separatorWidth;
         for (let i = 0; i < den; i++) {
             const angle = startAngleOffset + (i * 2 * Math.PI) / den;
             const x = centerX + Math.cos(angle) * radius;
@@ -571,8 +585,8 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             ctx.stroke();
         }
 
-        ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = strokeWidth;
+        ctx.strokeStyle = separatorColor;
+        ctx.lineWidth = separatorWidth;
         for (let i = 1; i < den; i++) {
             const x = left.x + ((right.x - left.x) * i) / den;
             ctx.beginPath();
@@ -610,8 +624,8 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             }
         }
 
-        ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = strokeWidth;
+        ctx.strokeStyle = separatorColor;
+        ctx.lineWidth = separatorWidth;
         if (isHorizontal) {
             for (let i = 1; i < den; i++) {
                 const x = left + sliceSize * i;
@@ -654,8 +668,8 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
                 ctx.fillRect(left + sliceWidth * i, top, sliceWidth, squareSize);
             }
 
-            ctx.strokeStyle = strokeColor;
-            ctx.lineWidth = strokeWidth;
+            ctx.strokeStyle = separatorColor;
+            ctx.lineWidth = separatorWidth;
             for (let i = 1; i < den; i++) {
                 const x = left + sliceWidth * i;
                 ctx.beginPath();
@@ -768,15 +782,25 @@ function verificar() {
     let heroeSprite = document.getElementById("heroe");
     let enemigoSprite = document.getElementById("enemigo");
 
-    if (!r.includes("/")) {
+    const match = r.match(/^\s*(\d+)\s*\/\s*(\d+)\s*$/);
+    if (!match) {
         mensajeBox.style.color = "#fbbf24";
         mensajeBox.innerHTML = "⚠️ ¡Escribe la respuesta en formato de fracción! (Ej: 2/5)";
         return;
     }
 
+    const respuestaNum = parseInt(match[1], 10);
+    const respuestaDen = parseInt(match[2], 10);
+
+    if (respuestaDen === 0) {
+        mensajeBox.style.color = "#fbbf24";
+        mensajeBox.innerHTML = "⚠️ El denominador no puede ser 0.";
+        return;
+    }
+
     bloqueado = true;
 
-    if (r === num + "/" + den) {
+    if (respuestaNum * den === respuestaDen * num) {
         problemaActual++;
         AudioEngine.playAcierto();
 
@@ -796,6 +820,11 @@ function verificar() {
 
         setTimeout(() => {
             enemigoSprite.classList.remove("recibirDaño");
+            bloqueado = false;
+            if (vidaEnemigo > 0) {
+                actualizar();
+                setTimeout(generarPregunta, 500);
+            }
         }, 650);
 
         puntos += 100;
@@ -837,7 +866,12 @@ function verificar() {
 
         setTimeout(() => {
             heroeSprite.classList.remove("recibirDaño");
-        }, 650);
+            bloqueado = false;
+            if (vidaJugador > 0) {
+                actualizar();
+                setTimeout(generarPregunta, 500);
+            }
+        }, 700);
 
         if (vidaJugador <= 0) {
             actualizar();
@@ -845,9 +879,6 @@ function verificar() {
             return;
         }
     }
-
-    actualizar();
-    setTimeout(generarPregunta, 1800);
 }
 
 function terminarJuego(victoria) {
