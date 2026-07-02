@@ -504,7 +504,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, startAngle, endAngle);
             ctx.closePath();
-            ctx.fillStyle = i < num ? activeColor : inactiveColor;
+            ctx.fillStyle = fillColor;
             ctx.fill();
             ctx.stroke();
         }
@@ -520,7 +520,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             ctx.lineTo(x1, left.y);
             ctx.lineTo(x2, left.y);
             ctx.closePath();
-            ctx.fillStyle = i < num ? activeColor : inactiveColor;
+            ctx.fillStyle = fillColor;
             ctx.fill();
             ctx.stroke();
         }
@@ -551,7 +551,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
         const top = centerY - rectHeight / 2;
         const sliceSize = isHorizontal ? rectWidth / den : rectHeight / den;
         for (let i = 0; i < den; i++) {
-            ctx.fillStyle = i < num ? activeColor : inactiveColor;
+            ctx.fillStyle = fillColor;
             if (isHorizontal) {
                 ctx.fillRect(left + sliceSize * i, top, sliceSize, rectHeight);
                 ctx.strokeRect(left + sliceSize * i, top, sliceSize, rectHeight);
@@ -574,7 +574,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
             const top = centerY - squareSize / 2;
             const sliceWidth = squareSize / den;
             for (let i = 0; i < den; i++) {
-                ctx.fillStyle = i < num ? activeColor : inactiveColor;
+                ctx.fillStyle = fillColor;
                 ctx.fillRect(left + sliceWidth * i, top, sliceWidth, squareSize);
                 ctx.strokeRect(left + sliceWidth * i, top, sliceWidth, squareSize);
             }
