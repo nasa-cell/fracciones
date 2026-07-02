@@ -246,6 +246,10 @@ function generarPregunta() {
         return;
     }
 
+    if (problemaActual > PROBLEMAS_POR_ENEMIGO) {
+        problemaActual = 1;
+    }
+
     let nivelDatos = temaUsuario && temaUsuario.rangos ? temaUsuario.rangos[rondaActual - 1] : cronicaAventura[rondaActual - 1];
     document.getElementById("enemigo").innerHTML = nivelDatos.enemigo;
     document.getElementById("enemigoNombre").innerHTML = nivelDatos.enemigoN;
@@ -841,6 +845,7 @@ function verificar() {
                     mensajeBox.innerHTML = "✨ ¡Rival derrotado! Viajando al siguiente reino...";
                     vidaEnemigo = VIDA_MAX_ENEMIGO;
                     actualizar();
+                    bloqueado = false;
                     setTimeout(generarPregunta, 1500);
                 }
             }, 800);
