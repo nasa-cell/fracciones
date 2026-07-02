@@ -569,7 +569,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
         const formasComplejas = ['pentagono', 'hexagono', 'estrella', 'corazon', 'semicirculo', 'rombo', 'trapecio', 'octagono'];
         if (formasComplejas.includes(forma)) {
             const shapePath = createShapePath(forma, centerX, centerY, radius, orientacion);
-            drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, fillColor);
+            drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, activeColor, inactiveColor);
             ctx.strokeStyle = '#000000cc';
             ctx.lineWidth = strokeWidth;
             ctx.stroke(shapePath);
