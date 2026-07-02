@@ -449,7 +449,7 @@ function drawShapeSections(ctx, shapePath, num, den, centerX, centerY, w, h, fil
     ctx.clip(shapePath);
     const startOffset = -Math.PI / 2;
     const radius = Math.max(w, h);
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 10;
     ctx.strokeStyle = '#000000';
     for (let i = 0; i < den; i++) {
         const start = startOffset + (i * 2 * Math.PI) / den;
@@ -489,7 +489,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
     const centerY = h / 2;
     const radius = Math.min(w, h) * 0.38;
     const fillColor = '#f97316';
-    const strokeWidth = 6;
+    const strokeWidth = 10;
     const strokeColor = '#000000';
 
     ctx.lineWidth = strokeWidth;
@@ -526,7 +526,7 @@ function dibujarFormaCanvas(canvas, forma, num, den, orientacion = 'vertical', m
         }
         if (den > 1) {
             ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 10;
             for (let i = 1; i < den; i++) {
                 const x = left.x + ((right.x - left.x) * i) / den;
                 ctx.beginPath();
