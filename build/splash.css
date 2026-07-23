@@ -1,0 +1,4 @@
+body { margin:0; font-family: Arial, Helvetica, sans-serif; background: transparent }
+.splash { display:flex; align-items:center; justify-content:center; height:100vh; flex-direction:column }
+.splash img { width:160px; height:auto; opacity:0.95 }
+.splash h1 { margin-top:12px; color:#222 }
