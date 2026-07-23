@@ -1,0 +1,32 @@
+{
+  "name": "fracciones-desktop",
+  "version": "1.0.0",
+  "description": "Versión de escritorio del proyecto web (Electron)",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64 --ia32",
+    "dist:portable": "electron-builder --win portable",
+    "dist:nsis": "electron-builder --win nsis",
+    "pack": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps",
+    "make-icon": "node scripts/make-icon.js"
+  },
+  "build": {
+    "extends": "electron-builder.yml"
+  },
+  "dependencies": {
+    "electron-store": "^8.0.0",
+    "electron-log": "^4.4.7",
+    "electron-updater": "^5.0.0",
+    "fs-extra": "^11.1.1",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^24.0.0",
+    "png-to-ico": "^1.0.0"
+  }
+}

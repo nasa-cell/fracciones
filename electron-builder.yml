@@ -1,0 +1,25 @@
+appId: com.example.fracciones
+productName: Fracciones
+copyright: "Copyright © $(year)"
+directories:
+  output: release
+  buildResources: build
+files:
+  - "**/*"
+asar: true
+win:
+  target:
+    - nsis
+    - portable
+  icon: build/icon.png
+nsis:
+  perMachine: false
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  uninstallDisplayName: "Fracciones"
+portable:
+  requestExecutionLevel: user
+  artifactName: "Fracciones-Portable-${arch}.${ext}"
+publish: null
