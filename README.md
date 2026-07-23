@@ -21,6 +21,14 @@ Solo necesitas un navegador moderno.
 3. Elige la dificultad y el modo.
 4. Presiona "Comenzar".
 
+## Instalación desde Google Drive
+
+Descarga e instala la aplicación en tu PC desde este enlace:
+
+- https://drive.google.com/file/d/1ZvFTJRGNG9LQBu6uuJUXDHgu5kp6lKdf/view?usp=drive_link
+
+Guarda el archivo en tu PC y ejecútalo para instalar la aplicación. Después de la instalación, abre la aplicación desde tu equipo.
+
 ## Estructura del proyecto
 
 - [index.html](index.html): estructura de la interfaz
