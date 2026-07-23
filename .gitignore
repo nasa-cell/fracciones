@@ -9,6 +9,7 @@ Thumbs.db
 # Dependencias y temporales
 node_modules/
 *.log
+release/
 
 # Archivos de respaldo
 *.tmp
