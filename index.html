@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fracciones Master</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <video id="bg-video" autoplay muted loop playsinline>
+    <source src="video fondo.mp4" type="video/mp4">
+  </video>
+  <video id="lose-video" class="hidden lose-video" playsinline>
+    <source src="fracciones.mp4" type="video/mp4">
+  </video>
+  <div id="confetti" class="confetti-container hidden"></div>
+  <div id="lose-overlay" class="hidden hard-loss-overlay">
+    <div class="overlay-content">
+      <div class="loss-title">Intenta de nuevo</div>
+      <div class="loss-subtitle">¡Sigue practicando y mejora tus fracciones!</div>
+      <button class="retry-button" onclick="location.reload()">🔄 Volver a jugar</button>
+    </div>
+  </div>
+  <div class="container">
+    <div id="menu">
+      <h2>Selecciona operaciones</h2>
+      <p class="info">Activa los cuadros de las operaciones que quieras practicar.</p>
+
+      <div class="modo-grid">
+        <div id="op-suma" class="op-card active" onclick="toggleOperacion('suma')">➕ Suma</div>
+        <div id="op-resta" class="op-card active" onclick="toggleOperacion('resta')">➖ Resta</div>
+        <div id="op-multiplicacion" class="op-card active" onclick="toggleOperacion('multiplicacion')">✖️ Multiplicar</div>
+        <div id="op-division" class="op-card active" onclick="toggleOperacion('division')">➗ División</div>
+      </div>
+
+      <h2>Selecciona dificultad</h2>
+      <div class="dificultad-grid">
+        <div id="nivel-facil" class="level-card active" onclick="seleccionarDificultad('facil')">🟢 Fácil</div>
+        <div id="nivel-medio" class="level-card" onclick="seleccionarDificultad('medio')">🟡 Medio</div>
+        <div id="nivel-dificil" class="level-card" onclick="seleccionarDificultad('dificil')">🔴 Difícil</div>
+      </div>
+
+      <h2>Selecciona modo</h2>
+      <div class="modo-grid">
+        <div id="modo-alternativas" class="op-card active" onclick="seleccionarModo('alternativas')">✅ Con alternativas</div>
+        <div id="modo-texto" class="op-card" onclick="seleccionarModo('texto')">✍️ Sin alternativas</div>
+      </div>
+
+      <button type="button" class="start-button" id="startBtn">▷ Comenzar</button>
+      <button type="button" class="secondary" onclick="window.location.href='kids/index.html'">Juego de niños</button>
+    </div>
+
+    <div id="juego" class="hidden">
+      <div class="juego-header">
+        <button class="small secondary video-toggle-anchor" id="videoToggleBtn" onclick="toggleVideo()">🎬 Ocultar video</button>
+        <div class="top">
+          <div class="box corner-box">❤️ <span id="vidas">3</span></div>
+          <div class="top-center">
+            <div class="box progress-box">
+              <div class="progress-info">
+                <span class="progress-label">Pregunta</span>
+                <span class="progress-count" id="progress-count">1/40</span>
+              </div>
+              <div class="progress-wrapper">
+                <div class="progress-fill" id="progress-fill"></div>
+              </div>
+            </div>
+          </div>
+          <div class="box corner-box">❌ <span id="errores">0</span></div>
+        </div>
+        <div class="subtop">
+          <div class="box">⭐ <span id="puntos">0</span></div>
+          <div class="box" id="modo">Modo: Con alternativas</div>
+          <button class="small secondary" onclick="volverInicio()">🔙 Volver al inicio</button>
+        </div>
+      </div>
+
+      <div class="pregunta" id="pregunta">?</div>
+
+      <div class="respuesta-row" id="alternativas"></div>
+      <div class="respuesta-row" id="respuesta-area">
+        <input id="respuesta" placeholder="Ej: 5/7">
+      </div>
+      <div class="respuesta-row">
+        <button type="button" class="btn-full" id="enviar-btn" onclick="enviar()">Enviar</button>
+      </div>
+
+      <h2 id="mensaje"></h2>
+    </div>
+
+    <div id="final" class="hidden">
+      <h1 id="resultado"></h1>
+      <button class="secondary" onclick="location.reload()">🔄 Jugar otra vez</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

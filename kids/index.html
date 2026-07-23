@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚔️ Fraction Hero RPG: Las 7 Pruebas ⚔️</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<audio id="bg-audio" preload="auto">
+    <source src="../fondo%20de%20sonido.mp3" type="audio/mpeg">
+</audio>
+<audio id="bg-audio-2" preload="auto">
+    <source src="../fondo%20de%20sonido2.mp3" type="audio/mpeg">
+</audio>
+<audio id="bg-audio-3" preload="auto">
+    <source src="../fondo%20de%20sinido3.mp3" type="audio/mpeg">
+</audio>
+<audio id="bg-audio-4" preload="auto">
+    <source src="../fondo%20de%20sonido4.mp3" type="audio/mpeg">
+</audio>
+<!-- Efectos de sonido adicionales -->
+<audio id="sfx-acierto" preload="auto">
+    <source src="../fondo%20de%20sonido2.mp3" type="audio/mpeg">
+</audio>
+<audio id="sfx-fallo" preload="auto">
+    <source src="../fondo%20de%20sinido3.mp3" type="audio/mpeg">
+</audio>
+<audio id="sfx-victoria" preload="auto">
+    <source src="../fondo%20de%20sonido4.mp3" type="audio/mpeg">
+</audio>
+<audio id="sfx-derrota" preload="auto">
+    <source src="../fondo%20de%20sinido3.mp3" type="audio/mpeg">
+</audio>
+<div class="contenedor">
+
+    <div id="perfil" class="perfil-screen">
+        <h1>Bienvenido al Juego de Niños</h1>
+        <p>Escribe tu nombre de héroe y elige tu avatar.</p>
+        <input id="nombreJugador" type="text" placeholder="Tu nombre aquí">
+        <div class="avatar-grid">
+            <button type="button" class="avatar-btn selected" data-avatar="🧙‍♂️">🧙‍♂️</button>
+            <button type="button" class="avatar-btn" data-avatar="🏹">🏹</button>
+            <button type="button" class="avatar-btn" data-avatar="🛡️">🛡️</button>
+            <button type="button" class="avatar-btn" data-avatar="🧝‍♀️">🧝‍♀️</button>
+        </div>
+        <div class="nota">Video de inicio activo solo en esta pantalla. Al ingresar, se oculta y queda solo el sonido con animación.</div>
+        <button id="perfilIngresarBtn" class="perfil-btn">Ingresar</button>
+        <button id="volverJuegoBtn" class="perfil-btn perfil-btn--outline" onclick="window.location.href='../index.html'">Volver a otro juego</button>
+    </div>
+
+    <div id="moduloJuego" class="oculto">
+        <h1>⚔️ FRACTION HERO RPG ⚔️</h1>
+        <div class="subtitulo">Las 10 Pruebas Celestiales</div>
+
+        <div class="disparos-container" id="disparosContainer"></div>
+
+        <div class="arena">
+            <div class="personaje">
+                <div class="sprite-container">
+                    <div id="heroe" class="sprite">🧙‍♂️</div>
+                    <div id="heroeDaño" class="daño-overlay"></div>
+                </div>
+                <div class="vida-info">
+                    <div class="vida">
+                        <div id="vidaJugador" class="barra"></div>
+                    </div>
+                    <div class="vida-texto">❤️ <span id="vidaJugadorTxt">100</span></div>
+                </div>
+                <h3 id="heroeNombre">Mago Aprendiz</h3>
+                <div class="rol">Héroe</div>
+            </div>
+
+            <div class="vs">VS</div>
+
+            <div class="personaje">
+                <div class="sprite-container">
+                    <div id="enemigo" class="sprite">👾</div>
+                    <div id="enemigoDaño" class="daño-overlay"></div>
+                </div>
+                <div class="vida-info">
+                    <div class="vida">
+                        <div id="vidaEnemigo" class="barra" style="background: linear-gradient(90deg, #ef4444, #f87171); box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);"></div>
+                    </div>
+                    <div class="vida-texto">😈 <span id="vidaEnemigoTxt">100</span></div>
+                </div>
+                <h3 id="enemigoNombre">Slime de Virus</h3>
+                <div class="rol">Rival</div>
+            </div>
+        </div>
+
+        <div class="stats-abajo">
+            <div><span class="stat-icon">🔰</span> Batalla <strong><span id="rondaTxt">1 / 10</span></strong></div>
+            <div><span class="stat-icon">🏆</span> Puntos <strong><span id="puntos">0</span></strong></div>
+        </div>
+
+        <div class="panel">
+            <div id="pregunta">¿Qué fracción representa?</div>
+            <div class="panel-grid">
+                <div id="bloquesArea" class="bloques-container panel-shape"></div>
+
+                <div class="panel-controls">
+                    <div class="controles">
+                        <input id="respuesta" placeholder="Ej: 3/5" autocomplete="off">
+                        <button id="btnAtacar" onclick="verificar()">¡ATACAR!</button>
+                    </div>
+                    <div id="mensaje"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="moduloFinal" class="pantalla-final oculto">
+        <h2 id="tituloFinal">🏆 ¡AVENTURA COMPLETADA!</h2>
+        <p>Has recorrido los 10 reinos matemáticos.</p>
+        <p>Puntuación Final: <strong id="puntosFinal" style="color: #f59e0b; font-size: 1.6rem;">0</strong></p>
+        <div id="rangoFinal" class="rango-final">Rango: Leyenda</div>
+        <button onclick="reiniciarJuego()" style="background: linear-gradient(180deg, #10b981, #047857);">Jugar de nuevo</button>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

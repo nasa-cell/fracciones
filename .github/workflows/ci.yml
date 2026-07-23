@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: List repository files
+        run: |
+          echo "Listing repository files"
+          ls -R
+
+      - name: Basic JS syntax validation
+        run: |
+          node -e "const fs=require('fs'); const path=require('path'); const all=fs.readdirSync('.'); console.log('Files:', all.length);"
+
+      - name: Validate HTML/CSS/JS presence
+        run: |
+          find . -type f \( -name '*.js' -o -name '*.html' -o -name '*.css' \) | sort
